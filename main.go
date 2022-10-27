@@ -1,22 +1,26 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
+	"github.com/zhuliminl/mc_server/config"
 	"github.com/zhuliminl/mc_server/database"
-	"github.com/zhuliminl/mc_server/util"
+	"github.com/zhuliminl/mc_server/server"
 )
 
 func main() {
-	fmt.Println("must control")
-
-	database.InitDB()
-
-	config, err := util.LoadConfig()
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(config)
+	environment := flag.String("e", "development", "")
+	flag.Usage = func() {
+		fmt.Println("Usage: server -e {mode}")
+		os.Exit(1)
 	}
+	flag.Parse()
+
+	config.Init(*environment)
+	database.InitDB()
+	server.Init()
+
 
 }

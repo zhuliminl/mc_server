@@ -1,6 +1,8 @@
-package util
+package config
 
 import (
+	"fmt"
+
 	"github.com/spf13/viper"
 )
 
@@ -22,24 +24,24 @@ type Config struct {
 
 var vp *viper.Viper
 
-func LoadConfig() (Config, error) {
-	vp = viper.New()
-	var config Config
+func Init(env string) {
+	fmt.Println("config-init", env)
 
+	vp = viper.New()
 	vp.SetConfigName("config")
 	vp.SetConfigType("json")
-	vp.AddConfigPath("./util")
+	vp.AddConfigPath("./config")
 	vp.AddConfigPath(".")
 
+	vp.ReadInConfig()
+	// fmt.Println(vp.Get("name"))
 	err := vp.ReadInConfig()
 	if err != nil {
-		return Config{}, err
+		fmt.Println(err)
+		// log
 	}
+}
 
-	err = vp.Unmarshal(&config)
-	if err != nil {
-		return Config{}, err
-	}
-
-	return config, nil
+func GetConfig() *viper.Viper {
+	return vp
 }

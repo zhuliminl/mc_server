@@ -7,6 +7,6 @@
     "user": "admin"
   },
   "server": {
-    "port": "3500"
+    "port": 3500
   }
 }
