@@ -1,9 +1,9 @@
 package server
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"github.com/zhuliminl/mc_server/controllers"
+	"github.com/zhuliminl/mc_server/middlewares"
 )
 
 func NewRouter() *gin.Engine {
@@ -11,23 +11,10 @@ func NewRouter() *gin.Engine {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
-	// health := new(controllers.HealthController)
+	user := new(controllers.UserController)
+	router.Use(middlewares.Auth())
+	router.GET("/user", user.GetUser)
+	router.PUT("/user", user.UpdateUser)
 
-	router.GET("/foo/:name", func(ctx *gin.Context) {
-		name := ctx.Param("name")
-		ctx.String(http.StatusOK, "hello %s", name)
-
-	})
-	// router.Use(middlewares.AuthMiddleware())
-
-	// v1 := router.Group("v1")
-	// {
-	// 	userGroup := v1.Group("user")
-	// 	{
-	// 		user := new(controllers.UserController)
-	// 		userGroup.GET("/:id", user.Retrieve)
-	// 	}
-	// }
 	return router
-
 }

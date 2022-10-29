@@ -1,12 +1,13 @@
 {
-  "name": "mc_server",
+  "name": "James",
   "database": {
-    "address": "17.20.0.2",
-    "port": "5432",
+    "address": "localhost",
     "password": "1234",
+    "port": "5432",
     "user": "admin"
   },
   "server": {
-    "port": 3500
+    "address": "localhost",
+    "port": "3500"
   }
 }

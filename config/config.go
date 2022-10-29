@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 
+	_ "github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
 
@@ -15,6 +16,7 @@ type DbConfig struct {
 
 type ServerConfig struct {
 	Port string `mapstructure:"port"`
+	Ip   string `mapstructure:"ip"`
 }
 
 type Config struct {
@@ -25,7 +27,7 @@ type Config struct {
 var vp *viper.Viper
 
 func Init(env string) {
-	fmt.Println("config-init", env)
+	fmt.Println("config => init", env)
 
 	vp = viper.New()
 	vp.SetConfigName("config")
@@ -34,12 +36,12 @@ func Init(env string) {
 	vp.AddConfigPath(".")
 
 	vp.ReadInConfig()
-	// fmt.Println(vp.Get("name"))
 	err := vp.ReadInConfig()
+
 	if err != nil {
 		fmt.Println(err)
-		// log
 	}
+
 }
 
 func GetConfig() *viper.Viper {
