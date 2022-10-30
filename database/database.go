@@ -15,29 +15,29 @@ func InitDB() {
 	// ConnectDB()
 }
 
-func ConnectDB() sql.DB {
-	DB, err := sql.Open("mysql", GetDbUrl())
+func ConnectDB() *sql.DB {
+	// DB, err := sql.Open("mysql", GetDbUrl())
 
-	// execSQL(createAdHead)
+	// // execSQL(createAdHead)
 
-	var name string
-	err = DB.QueryRow("select headId from adHead where id = ?", 1).Scan(&name)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// var name string
+	// err = DB.QueryRow("select headId from adHead where id = ?", 1).Scan(&name)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	fmt.Println(name)
+	// fmt.Println(name)
 
-	if err != nil {
-		log.Println("database => connect-db-error:", err)
-	}
+	// if err != nil {
+	// 	log.Println("database => connect-db-error:", err)
+	// }
 
-	_err := DB.Ping()
-	if _err != nil {
-		fmt.Println("db ===>> ", _err)
-		log.Println("database => connect-db-error:", _err)
-	}
-	fmt.Println("db ===>> ", DB)
+	// _err := DB.Ping()
+	// if _err != nil {
+	// 	fmt.Println("db ===>> ", _err)
+	// 	log.Println("database => connect-db-error:", _err)
+	// }
+	// fmt.Println("db ===>> ", DB)
 	return DB
 }
 

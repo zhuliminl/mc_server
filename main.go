@@ -19,7 +19,7 @@ func main() {
 
 	config.Init(*environment)
 	// database.InitDB()
-	server.Init()
+	server.StartServer()
 
 
 }
