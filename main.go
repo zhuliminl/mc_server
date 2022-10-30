@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/zhuliminl/mc_server/config"
-	"github.com/zhuliminl/mc_server/database"
 	"github.com/zhuliminl/mc_server/server"
 )
 
@@ -19,7 +18,7 @@ func main() {
 	flag.Parse()
 
 	config.Init(*environment)
-	database.InitDB()
+	// database.InitDB()
 	server.Init()
 
 
