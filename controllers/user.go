@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/zhuliminl/mc_server/entity"
 	"github.com/zhuliminl/mc_server/forms"
 	"github.com/zhuliminl/mc_server/helper"
 	"github.com/zhuliminl/mc_server/service"
@@ -40,20 +39,6 @@ func (ctl *userController) CreateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
-	user := ctl.userService.CreateUser(new(entity.User{}))
+	user := ctl.userService.CreateUser(json)
 	c.JSON(http.StatusOK, user)
 }
-
-// func (u UserController) UpdateUser(c *gin.Context) {
-// 	var user forms.UserSignUp
-// 	err := c.ShouldBindJSON(&user)
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		c.Abort()
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, gin.H{"message": "updateUser"})
-// 	c.Abort()
-// 	return
-// }

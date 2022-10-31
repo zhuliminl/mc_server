@@ -2,7 +2,9 @@ package repository
 
 import (
 	"database/sql"
+	"log"
 
+	"github.com/zhuliminl/mc_server/database"
 	"github.com/zhuliminl/mc_server/entity"
 )
 
@@ -36,6 +38,24 @@ func (db *userConnection) UpdateUser(id string) entity.User {
 }
 
 func (db *userConnection) CreateUser(user entity.User) entity.User {
-	user.Username = "saul"
+	stmt, err := db.connection.Prepare(database.CreateUser)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+	_, err1 :=  stmt.Exec(
+		user.UserId, 
+		user.Username, 
+		user.Email, 
+		user.Phone, 
+		user.Password,
+	)
+	if err1 != nil {
+		log.Fatal("create-user-err1",err1)
+	}
+
+	// if _, err := stmt.Exec(id+1, project.mascot, project.release, "open source"); err != nil {
+	// 	log.Fatal(err)
+	// }
 	return user
 }

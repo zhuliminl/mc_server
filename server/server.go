@@ -12,14 +12,13 @@ import (
 	"github.com/zhuliminl/mc_server/service"
 )
 
-var (
-	db             *sql.DB                    = database.GetDB()
-	userRepository repository.UserRepository  = repository.NewUserRepository(db)
-	userService    service.UserService        = service.NewUserService(userRepository)
-	userController controllers.UserController = controllers.NewUserController(userService)
-)
-
 func StartServer() {
+	var (
+		db             *sql.DB                    = database.GetDB()
+		userRepository repository.UserRepository  = repository.NewUserRepository(db)
+		userService    service.UserService        = service.NewUserService(userRepository)
+		userController controllers.UserController = controllers.NewUserController(userService)
+	)
 	c := config.GetConfig()
 	address := c.GetString("server.address")
 	port := c.GetString("server.port")
