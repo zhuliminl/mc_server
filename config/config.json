@@ -1,10 +1,11 @@
 {
-  "name": "James",
+  "name": "mc_server",
   "database": {
-    "address": "localhost",
-    "password": "1234",
-    "port": "5432",
-    "user": "admin"
+    "address": "",
+    "password": "",
+    "port": "",
+    "user": "",
+    "enableCreate": true
   },
   "server": {
     "address": "localhost",

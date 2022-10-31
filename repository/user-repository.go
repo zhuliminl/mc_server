@@ -8,6 +8,7 @@ import (
 
 type UserRepository interface {
 	ProfileUser(id string) entity.User
+	UpdateUser(id string) entity.User
 }
 
 type userConnection struct {
@@ -20,8 +21,16 @@ func NewUserRepository(db *sql.DB) UserRepository {
 	}
 }
 
-func (db *userConnection) ProfileUser (id string ) entity.User {
+func (db *userConnection) ProfileUser(id string) entity.User {
 	var user entity.User
 	user.Name = "saul"
 	return user
+}
+
+
+func (db *userConnection) UpdateUser(id string) entity.User {
+	var user entity.User
+	user.Name = "saul"
+	return user
+
 }

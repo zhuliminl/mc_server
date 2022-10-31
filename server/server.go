@@ -13,9 +13,9 @@ import (
 )
 
 var (
-	db *sql.DB = database.ConnectDB()
-	userRepository repository.UserRepository = repository.NewUserRepository(db)
-	userService service.UserService = service.NewUserService(userRepository)
+	db             *sql.DB                    = database.ConnectDB()
+	userRepository repository.UserRepository  = repository.NewUserRepository(db)
+	userService    service.UserService        = service.NewUserService(userRepository)
 	userController controllers.UserController = controllers.NewUserController(userService)
 )
 

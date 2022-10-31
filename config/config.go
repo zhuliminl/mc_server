@@ -8,10 +8,11 @@ import (
 )
 
 type DbConfig struct {
-	Address  string `mapstructure:"address"`
-	Port     string `mapstructure:"port"`
-	User     string `mapstructure:"user"`
-	Password string `mapstructure:"password"`
+	Address      string `mapstructure:"address"`
+	Port         string `mapstructure:"port"`
+	User         string `mapstructure:"user"`
+	Password     string `mapstructure:"password"`
+	EnableCreate bool   `mapstructure:"enableCreate"`
 }
 
 type ServerConfig struct {

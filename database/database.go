@@ -2,20 +2,23 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
-
-	_ "github.com/go-sql-driver/mysql"
+	// _ "github.com/go-sql-driver/mysql"
+	// "github.com/zhuliminl/mc_server/config"
 )
 
 var DB *sql.DB
 
 func InitDB() {
-	fmt.Println("init db")
-	// ConnectDB()
+	// c := config.GetConfig()
+
+	// reRreate := c.GetBool("database.enableCreate")
+
+	// fmt.Println("初始化数据库", reRreate)
 }
 
 func ConnectDB() *sql.DB {
+
 	// DB, err := sql.Open("mysql", GetDbUrl())
 
 	// // execSQL(createAdHead)
@@ -53,17 +56,3 @@ func execSQL(sqlStmt string) {
 		log.Println("db-execSQL-exec-error: ", err)
 	}
 }
-
-const createAdHead = `
-  CREATE TABLE IF NOT EXISTS adHead (
-    id INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    headId INTEGER UNSIGNED COMMENT '团长id',
-    headName VARCHAR(32) COMMENT '团长名称',
-    dodokCommission INTEGER UNSIGNED COMMENT '多多客佣金%',
-    headCommission INTEGER UNSIGNED COMMENT '团长佣金%',
-    coupon INTEGER UNSIGNED COMMENT '优惠券金额',
-    wechatNickname VARCHAR(32) COMMENT '微信昵称',
-    wechatNumber VARCHAR(20) COMMENT '微信号',
-    pddNickname VARCHAR(32) COMMENT '拼多多昵称'
-  );
-`

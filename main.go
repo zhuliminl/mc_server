@@ -16,10 +16,9 @@ func main() {
 		os.Exit(1)
 	}
 	flag.Parse()
-
 	config.Init(*environment)
+
 	// database.InitDB()
 	server.StartServer()
-
 
 }
