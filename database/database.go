@@ -2,46 +2,40 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
-	// _ "github.com/go-sql-driver/mysql"
-	// "github.com/zhuliminl/mc_server/config"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/zhuliminl/mc_server/config"
 )
 
 var DB *sql.DB
 
-func InitDB() {
-	// c := config.GetConfig()
-
-	// reRreate := c.GetBool("database.enableCreate")
-
-	// fmt.Println("初始化数据库", reRreate)
+func GetDB() *sql.DB {
+	return DB
 }
 
-func ConnectDB() *sql.DB {
+func InitDB() {
+	connectDB()
 
-	// DB, err := sql.Open("mysql", GetDbUrl())
+	c := config.GetConfig()
+	needCreate := c.GetBool("database.enableCreate")
+	fmt.Println("初始化数据库", needCreate)
+	if needCreate {
+		createDB()
+	}
+}
 
-	// // execSQL(createAdHead)
+func connectDB() {
+	var err error
+	DB, err = sql.Open("mysql", GetDbUrl())
+	if err != nil {
+		log.Fatal("db-connect-db-fail", err)
+	}
+}
 
-	// var name string
-	// err = DB.QueryRow("select headId from adHead where id = ?", 1).Scan(&name)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// fmt.Println(name)
-
-	// if err != nil {
-	// 	log.Println("database => connect-db-error:", err)
-	// }
-
-	// _err := DB.Ping()
-	// if _err != nil {
-	// 	fmt.Println("db ===>> ", _err)
-	// 	log.Println("database => connect-db-error:", _err)
-	// }
-	// fmt.Println("db ===>> ", DB)
-	return DB
+func createDB() {
+	execSQL(createUserTable)
 }
 
 func execSQL(sqlStmt string) {

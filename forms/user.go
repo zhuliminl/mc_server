@@ -1,10 +1,8 @@
 package forms
 
-type UserSignUp struct {
-	Name     string `json:"name" binding:"required,max=10"`
-	BirthDay string `json:"birthday" binding:"required"`
-}
-
-type UserId struct {
-	id string `form:"id" binding:"required"`
+type UserCreate struct {
+	Username string `json:"username" binding:"required,max=10"`
+	Email    string `json:"email" binding:"required"`
+	Phone    string `json:"phone" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }

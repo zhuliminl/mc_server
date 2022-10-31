@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	db             *sql.DB                    = database.ConnectDB()
+	db             *sql.DB                    = database.GetDB()
 	userRepository repository.UserRepository  = repository.NewUserRepository(db)
 	userService    service.UserService        = service.NewUserService(userRepository)
 	userController controllers.UserController = controllers.NewUserController(userService)
@@ -27,7 +27,9 @@ func StartServer() {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+
 	router.GET("/user", userController.Profile)
+	router.POST("/user", userController.CreateUser)
 
 	router.Run(address + ":" + port)
 }
