@@ -5,7 +5,8 @@
     "password": "",
     "port": "",
     "user": "",
-    "enableCreate": true
+    "enableCreate": true,
+    "enableLog": false
   },
   "server": {
     "address": "localhost",

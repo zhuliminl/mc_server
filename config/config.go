@@ -13,6 +13,7 @@ type DbConfig struct {
 	User         string `mapstructure:"user"`
 	Password     string `mapstructure:"password"`
 	EnableCreate bool   `mapstructure:"enableCreate"`
+	EnableLog    bool   `mapstructure:"enableLog"`
 }
 
 type ServerConfig struct {
