@@ -9,9 +9,18 @@ import (
 )
 
 type UserRepository interface {
-	ProfileUser(id string) entity.User
-	UpdateUser(id string) entity.User
-	CreateUser(user entity.User) entity.User
+	Get(id string) entity.User
+	Update(id string) entity.User
+	Create(user entity.User) entity.User
+
+	// List() ([]model.NtpServer, error)
+	// Save(plan *model.Plan, zones []string) error
+	// GetById(id string) (model.Plan, error)
+	// Batch(operation string, items []model.Zone) error
+	// Batch(operation string, items []model.Zone) error
+	// ListByRegionId(id string) ([]model.Zone, error)
+	// Page(num, size int) (int, []model.Zone, error)
+	// Delete(name string) error
 }
 
 type userConnection struct {
@@ -24,34 +33,34 @@ func NewUserRepository(db *sql.DB) UserRepository {
 	}
 }
 
-func (db *userConnection) ProfileUser(id string) entity.User {
+func (db *userConnection) Get(id string) entity.User {
 	var user entity.User
 	user.Username = "saul"
 	return user
 }
 
-func (db *userConnection) UpdateUser(id string) entity.User {
+func (db *userConnection) Update(id string) entity.User {
 	var user entity.User
 	user.Username = "saul"
 	return user
 
 }
 
-func (db *userConnection) CreateUser(user entity.User) entity.User {
+func (db *userConnection) Create(user entity.User) entity.User {
 	stmt, err := db.connection.Prepare(database.CreateUser)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
-	_, err1 :=  stmt.Exec(
-		user.UserId, 
-		user.Username, 
-		user.Email, 
-		user.Phone, 
+	_, err1 := stmt.Exec(
+		user.UserId,
+		user.Username,
+		user.Email,
+		user.Phone,
 		user.Password,
 	)
 	if err1 != nil {
-		log.Fatal("create-user-err1",err1)
+		log.Fatal("create-user-err1", err1)
 	}
 
 	// if _, err := stmt.Exec(id+1, project.mascot, project.release, "open source"); err != nil {

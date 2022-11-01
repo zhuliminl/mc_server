@@ -1,11 +1,11 @@
 package entity
 
 type User struct {
-	UserId         string
-	Username       string
-	Email          string
-	Phone          string
-	Password       string
-	WechatNickname string
-	WechatNumber   string
+	UserId         string `json:"userId"`
+	Username       string `json:"username"`
+	Email          string `json:"email"`
+	Phone          string `json:"iphone"`
+	Password       string `json:"pwd"`
+	WechatNickname string `json:"wechat_nickname"`
+	WechatNumber   string `json:"wechat_number"`
 }

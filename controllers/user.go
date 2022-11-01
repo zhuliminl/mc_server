@@ -27,7 +27,8 @@ func NewUserController(userService service.UserService) UserController {
 func (ctl *userController) Profile(c *gin.Context) {
 	id := "1"
 	user := ctl.userService.Profile(id)
-	c.JSON(http.StatusOK, user)
+	res := helper.BuildResponse(true, "user data", user)
+	c.JSON(http.StatusOK, res)
 	c.Abort()
 }
 
@@ -40,5 +41,6 @@ func (ctl *userController) CreateUser(c *gin.Context) {
 		return
 	}
 	user := ctl.userService.CreateUser(json)
-	c.JSON(http.StatusOK, user)
+	res := helper.BuildResponse(true, "create user success", user)
+	c.JSON(http.StatusOK, res)
 }

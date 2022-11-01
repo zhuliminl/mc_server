@@ -12,6 +12,9 @@ import (
 	"github.com/zhuliminl/mc_server/service"
 )
 
+func init() {
+}
+
 func StartServer() {
 	var (
 		db             *sql.DB                    = database.GetDB()
