@@ -14,5 +14,6 @@ const createUserTable = `
 `
 
 const CreateUser = `INSERT INTO user(userId, username, email, phone, password ) VALUES ( ?, ?, ?, ?, ? )`
-const FindUser = ``
+const DeleteUserByUserId = `DELETE FROM user WHERE userId=?`
+const FindUserByUserId = `SELECT id, userId, username from user WHERE userId=?`
 const UpdateUser = ``

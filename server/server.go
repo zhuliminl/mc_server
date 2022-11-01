@@ -30,8 +30,9 @@ func StartServer() {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
-	router.GET("/user", userController.Profile)
-	router.POST("/user", userController.CreateUser)
+	router.GET("/user", userController.GetByUserId)
+	router.POST("/user", userController.Create)
+	router.DELETE("/user", userController.DeleteByUserId)
 
 	router.Run(address + ":" + port)
 }

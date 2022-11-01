@@ -6,3 +6,7 @@ type UserCreate struct {
 	Phone    string `json:"phone" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
+
+type UserDelete struct {
+	UserId string `json:"userId" binding:"required"`
+}

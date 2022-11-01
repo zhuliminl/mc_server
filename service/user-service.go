@@ -8,8 +8,9 @@ import (
 )
 
 type UserService interface {
-	Profile(id string) entity.User
-	CreateUser(userPayload forms.UserCreate) entity.User
+	Get(id string) entity.User
+	Create(userPayload forms.UserCreate) entity.User
+	Delete(userPayload forms.UserDelete)
 
 	// Get(name string) (*dto.User, error)
 	// List(user dto.SessionUser, conditions condition.Conditions) ([]dto.User, error)
@@ -33,11 +34,11 @@ func NewUserService(userRepo repository.UserRepository) UserService {
 	}
 }
 
-func (service *userService) Profile(id string) entity.User {
+func (service *userService) Get(id string) entity.User {
 	return service.userRepository.Get(id)
 }
 
-func (service *userService) CreateUser(userPayload forms.UserCreate) entity.User {
+func (service *userService) Create(userPayload forms.UserCreate) entity.User {
 	id := uuid.NewV4()
 	user := entity.User{
 		UserId:         id.String(),
@@ -52,4 +53,8 @@ func (service *userService) CreateUser(userPayload forms.UserCreate) entity.User
 
 func (service *userService) Foo(id string) entity.User {
 	return service.userRepository.Get(id)
+}
+
+func (service *userService) Delete(userPayload forms.UserDelete) {
+	service.userRepository.Delete(userPayload.UserId)
 }
