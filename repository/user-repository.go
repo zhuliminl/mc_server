@@ -1,11 +1,16 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"log"
 
 	"github.com/zhuliminl/mc_server/database"
 	"github.com/zhuliminl/mc_server/entity"
+)
+
+var (
+	ctx context.Context
 )
 
 type UserRepository interface {
@@ -86,30 +91,51 @@ func (db *userConnection) Delete(userId string) {
 		fmt.Println("uuuuuuu", user)
 	*/
 
-	rows, err := db.connection.Query(database.FindUserByUserId, userId)
-	if err != nil {
-		log.Fatal("prepare-delete-user-err", err)
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var (
-			id       int
-			userId   string
-			username string
-		)
-		if err := rows.Scan(&id, &userId, &username); err != nil {
-			log.Fatal(err)
+	/*
+		rows, err := db.connection.Query(database.FindUserByUserId, userId)
+		if err != nil {
+			log.Fatal("prepare-delete-user-err", err)
 		}
-		log.Printf("id %d name is %s\n", id, username)
+		defer rows.Close()
+		for rows.Next() {
+			var (
+				id       int
+				userId   string
+				username string
+			)
+			if err := rows.Scan(&id, &userId, &username); err != nil {
+				log.Fatal(err)
+			}
+			log.Printf("id %d name is %s\n", id, username)
+		}
+	*/
+
+	// var ctx context.Context
+	var (
+		id       int
+		_userId  string
+		username string
+	)
+
+	err := db.connection.QueryRowContext(ctx, database.FindUserByUserId, userId).Scan(&id, &_userId, &username)
+	switch {
+	case err == sql.ErrNoRows:
+		log.Println("no user with id", userId)
+	case err != nil:
+		log.Println("query Error", err)
+	default:
+		log.Println("-------------------->>", username)
 	}
 
-	stmtDelelte, err := db.connection.Prepare(database.DeleteUserByUserId)
+	/*
+	stmtDelete, err := db.connection.Prepare(database.DeleteUserByUserId)
 	if err != nil {
 		log.Fatal("prepare-delete-user-err", err)
 	}
-	defer stmtDelelte.Close()
+	defer stmtDelete.Close()
 
-	if _, err := stmtDelelte.Exec(userId); err != nil {
+	if _, err := stmtDelete.Exec(userId); err != nil {
 		log.Fatal("exec-delete-user-err", err)
 	}
+	*/
 }
