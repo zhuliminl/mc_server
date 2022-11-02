@@ -91,11 +91,11 @@ func (db *userConnection) GetAll() []dto.UserAll {
 			log.Println("db-scan-all-user-err", err)
 		}
 		user := dto.UserAll{
-			UserId:   userId.String,
-			Username: username.String,
-			Email:    email.String,
-			Phone:    phone.String,
-			// WechatNickname: wechatNickname.String,
+			UserId:         userId.String,
+			Username:       username.String,
+			Email:          email.String,
+			Phone:          phone.String,
+			WechatNickname: wechatNickname.String,
 		}
 		allUsers = append(allUsers, user)
 	}
