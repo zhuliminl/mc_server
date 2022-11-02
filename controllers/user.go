@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/zhuliminl/mc_server/forms"
@@ -14,6 +15,7 @@ type UserController interface {
 	GetAll(context *gin.Context)
 	Create(context *gin.Context)
 	DeleteByUserId(context *gin.Context)
+	GenerateUsers(context *gin.Context)
 }
 
 type userController struct {
@@ -24,6 +26,22 @@ func NewUserController(userService service.UserService) UserController {
 	return &userController{
 		userService: userService,
 	}
+}
+
+// 创建 faker 用户
+func (ctl *userController) GenerateUsers(c *gin.Context) {
+	amount := c.Query("amount")
+	amountInt, err := strconv.Atoi(amount)
+	if err != nil {
+		res := helper.BuildErrorResponse("Failed to process request", http.ErrUseLastResponse.Error(), err)
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+	ctl.userService.GenerateUsers(amountInt)
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+	})
+	c.Abort()
 }
 
 // 获取所有用户
