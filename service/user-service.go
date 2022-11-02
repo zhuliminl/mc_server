@@ -9,6 +9,7 @@ import (
 
 type UserService interface {
 	Get(id string) entity.User
+	GetAll() []interface{}
 	Create(userPayload forms.UserCreate) entity.User
 	Delete(userPayload forms.UserDelete)
 
@@ -37,6 +38,9 @@ func NewUserService(userRepo repository.UserRepository) UserService {
 func (service *userService) Get(id string) entity.User {
 	return service.userRepository.Get(id)
 }
+func (service *userService) GetAll() []interface{} {
+	return service.userRepository.GetAll()
+}
 
 func (service *userService) Create(userPayload forms.UserCreate) entity.User {
 	id := uuid.NewV4()
@@ -47,6 +51,9 @@ func (service *userService) Create(userPayload forms.UserCreate) entity.User {
 		Phone:          userPayload.Phone,
 		WechatNickname: "",
 		WechatNumber:   "",
+	}
+	for i := 1; i <= 10000; i++ {
+		service.userRepository.Create(user)
 	}
 	return service.userRepository.Create(user)
 }

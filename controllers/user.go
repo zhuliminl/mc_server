@@ -11,6 +11,7 @@ import (
 
 type UserController interface {
 	GetByUserId(context *gin.Context)
+	GetAll(context *gin.Context)
 	Create(context *gin.Context)
 	DeleteByUserId(context *gin.Context)
 }
@@ -25,9 +26,23 @@ func NewUserController(userService service.UserService) UserController {
 	}
 }
 
+// 获取所有用户
+func (ctl *userController) GetAll(c *gin.Context) {
+	users := ctl.userService.GetAll()
+	res := helper.BuildResponse(true, "all users data", users)
+	c.JSON(http.StatusOK, res)
+	c.Abort()
+}
+
 // 获取用户
 func (ctl *userController) GetByUserId(c *gin.Context) {
-	id := "1"
+	id := c.Query("userId")
+	if id == "" {
+		res := helper.BuildErrorResponse("Failed to process request", http.ErrUseLastResponse.Error(), helper.EmptyObj{})
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
 	user := ctl.userService.Get(id)
 	res := helper.BuildResponse(true, "user data", user)
 	c.JSON(http.StatusOK, res)

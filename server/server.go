@@ -31,6 +31,7 @@ func StartServer() {
 	router.Use(gin.Recovery())
 
 	router.GET("/user", userController.GetByUserId)
+	router.GET("/userAll", userController.GetAll)
 	router.POST("/user", userController.Create)
 	router.DELETE("/user", userController.DeleteByUserId)
 

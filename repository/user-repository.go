@@ -15,6 +15,7 @@ var (
 
 type UserRepository interface {
 	Get(id string) entity.User
+	GetAll() []interface{}
 	Update(id string) entity.User
 	Create(user entity.User) entity.User
 	Delete(userId string)
@@ -39,10 +40,66 @@ func NewUserRepository(db *sql.DB) UserRepository {
 	}
 }
 
-func (db *userConnection) Get(id string) entity.User {
+func (db *userConnection) Get(userId string) entity.User {
 	var user entity.User
-	user.Username = "saul"
+	err := db.connection.QueryRow(database.FindUserByUserId, userId).Scan(
+		&user.UserId,
+		&user.Username,
+		&user.Email,
+		&user.Phone,
+		&user.WechatNickname,
+		&user.WechatNumber,
+	)
+	switch {
+	case err == sql.ErrNoRows:
+		log.Println("saul ------------->>>> no user with id", userId)
+	case err != nil:
+		log.Println("query Error", err)
+	default:
+		return user
+	}
+	// fixme
 	return user
+}
+
+func (db *userConnection) GetAll() []interface{} {
+	var allUsers []interface{}
+	rows, err := db.connection.Query(database.FindUserAll)
+
+	if err != nil {
+		log.Panicln("db-find-all-user-err", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var (
+			userId         sql.NullString
+			username       sql.NullString
+			email          sql.NullString
+			phone          sql.NullString
+			wechatNickname sql.NullString
+			wechatNumber   sql.NullString
+		)
+		if err := rows.Scan(
+			&userId,
+			&username,
+			&email,
+			&phone,
+			&wechatNickname,
+			&wechatNumber,
+		); err != nil {
+			log.Println("db-scan-all-user-err", err)
+		}
+		user := map[string]interface{}{
+			"userId":         userId.String,
+			"username":       username.String,
+			"email":          email.String,
+			"phone":          phone.String,
+			"wechatNickname": wechatNickname.String,
+			"wechatNumber":   wechatNumber.String,
+		}
+		allUsers = append(allUsers, user)
+	}
+	return allUsers
 }
 
 func (db *userConnection) Update(id string) entity.User {
@@ -117,25 +174,26 @@ func (db *userConnection) Delete(userId string) {
 		username string
 	)
 
-	err := db.connection.QueryRowContext(ctx, database.FindUserByUserId, userId).Scan(&id, &_userId, &username)
+	// err := db.connection.QueryRowContext(ctx, database.FindUserByUserId, userId).Scan(&id, &_userId, &username)
+	err := db.connection.QueryRow(database.FindUserByUserId, userId).Scan(&id, &_userId, &username)
 	switch {
 	case err == sql.ErrNoRows:
 		log.Println("no user with id", userId)
 	case err != nil:
 		log.Println("query Error", err)
 	default:
-		log.Println("-------------------->>", username)
+		log.Println("-------------------->>", id, _userId, username)
 	}
 
 	/*
-	stmtDelete, err := db.connection.Prepare(database.DeleteUserByUserId)
-	if err != nil {
-		log.Fatal("prepare-delete-user-err", err)
-	}
-	defer stmtDelete.Close()
+		stmtDelete, err := db.connection.Prepare(database.DeleteUserByUserId)
+		if err != nil {
+			log.Fatal("prepare-delete-user-err", err)
+		}
+		defer stmtDelete.Close()
 
-	if _, err := stmtDelete.Exec(userId); err != nil {
-		log.Fatal("exec-delete-user-err", err)
-	}
+		if _, err := stmtDelete.Exec(userId); err != nil {
+			log.Fatal("exec-delete-user-err", err)
+		}
 	*/
 }
