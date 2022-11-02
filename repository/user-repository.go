@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/zhuliminl/mc_server/database"
+	"github.com/zhuliminl/mc_server/dto"
 	"github.com/zhuliminl/mc_server/entity"
 )
 
@@ -15,11 +16,12 @@ var (
 
 type UserRepository interface {
 	Get(id string) entity.User
-	GetAll() []interface{}
+	GetAll() []dto.UserAll
 	Update(id string) entity.User
 	Create(user entity.User) entity.User
 	Delete(userId string)
 
+	// GetAll() []interface{}
 	// List() ([]model.NtpServer, error)
 	// Save(plan *model.Plan, zones []string) error
 	// GetById(id string) (model.Plan, error)
@@ -62,7 +64,46 @@ func (db *userConnection) Get(userId string) entity.User {
 	return user
 }
 
-func (db *userConnection) GetAll() []interface{} {
+func (db *userConnection) GetAll() []dto.UserAll {
+	var allUsers []dto.UserAll
+
+	rows, err := db.connection.Query(database.FindUserAll)
+	if err != nil {
+		log.Panicln("db-find-all-user-err", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			userId         sql.NullString
+			username       sql.NullString
+			email          sql.NullString
+			phone          sql.NullString
+			wechatNickname sql.NullString
+		)
+		if err := rows.Scan(
+			&userId,
+			&username,
+			&email,
+			&phone,
+			&wechatNickname,
+		); err != nil {
+			log.Println("db-scan-all-user-err", err)
+		}
+		user := dto.UserAll{
+			UserId:   userId.String,
+			Username: username.String,
+			Email:    email.String,
+			Phone:    phone.String,
+			// WechatNickname: wechatNickname.String,
+		}
+		allUsers = append(allUsers, user)
+	}
+	return allUsers
+}
+
+/*
+func (db *userConnection) GetAll() []dto.UserAll {
 	var allUsers []interface{}
 	rows, err := db.connection.Query(database.FindUserAll)
 
@@ -101,6 +142,7 @@ func (db *userConnection) GetAll() []interface{} {
 	}
 	return allUsers
 }
+*/
 
 func (db *userConnection) Update(id string) entity.User {
 	var user entity.User

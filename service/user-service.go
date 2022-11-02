@@ -2,6 +2,7 @@ package service
 
 import (
 	uuid "github.com/satori/go.uuid"
+	"github.com/zhuliminl/mc_server/dto"
 	"github.com/zhuliminl/mc_server/entity"
 	"github.com/zhuliminl/mc_server/forms"
 	"github.com/zhuliminl/mc_server/repository"
@@ -9,7 +10,8 @@ import (
 
 type UserService interface {
 	Get(id string) entity.User
-	GetAll() []interface{}
+	// GetAll() []interface{}
+	GetAll() []dto.UserAll
 	Create(userPayload forms.UserCreate) entity.User
 	Delete(userPayload forms.UserDelete)
 
@@ -38,7 +40,7 @@ func NewUserService(userRepo repository.UserRepository) UserService {
 func (service *userService) Get(id string) entity.User {
 	return service.userRepository.Get(id)
 }
-func (service *userService) GetAll() []interface{} {
+func (service *userService) GetAll() []dto.UserAll {
 	return service.userRepository.GetAll()
 }
 
