@@ -60,3 +60,17 @@ func Error500(c *gin.Context, err error) bool {
 	}
 	return false
 }
+
+// 发送成功的业务 response
+func SendResponseOk(c *gin.Context, message string, data interface{}) {
+	res := BuildResponse(true, message, data)
+	c.JSON(http.StatusOK, res)
+	c.Abort()
+}
+
+// 发送成功的业务 response
+func SendResponseFail(c *gin.Context, message string, data interface{}) {
+	res := BuildResponse(false, message, data)
+	c.JSON(http.StatusOK, res)
+	c.Abort()
+}

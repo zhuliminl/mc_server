@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"errors"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -37,10 +36,7 @@ func (ctl *userController) GenerateUsers(c *gin.Context) {
 	}
 
 	ctl.userService.GenerateUsers(amountInt)
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-	})
-	c.Abort()
+	SendResponseOk(c, "", EmptyObj{})
 }
 
 // 获取所有用户
@@ -50,9 +46,7 @@ func (ctl *userController) GetAll(c *gin.Context) {
 		return
 	}
 
-	res := BuildResponse(true, "all users data", users)
-	c.JSON(http.StatusOK, res)
-	c.Abort()
+	SendResponseOk(c, "", users)
 }
 
 // 获取用户
@@ -69,28 +63,23 @@ func (ctl *userController) GetByUserId(c *gin.Context) {
 		return
 	}
 
-	res := BuildResponse(true, "user data", user)
-	c.JSON(http.StatusOK, res)
-	c.Abort()
+	SendResponseOk(c, "", user)
 }
 
 // 创建用户
 func (ctl *userController) Create(c *gin.Context) {
 	var json dto.UserCreate
 	err := c.ShouldBindJSON(&json)
-	if err != nil {
-		res := BuildErrorResponse("Failed to process request", err.Error(), EmptyObj{})
-		c.JSON(http.StatusBadRequest, res)
+	if Error400(c, err) {
 		return
 	}
+
 	user, err := ctl.userService.Create(json)
 	if Error500(c, err) {
 		return
 	}
 
-	res := BuildResponse(true, "create user success", user)
-	c.JSON(http.StatusOK, res)
-	c.Abort()
+	SendResponseOk(c, "create user success", user)
 }
 
 // 删除用户
@@ -101,7 +90,5 @@ func (ctl *userController) DeleteByUserId(c *gin.Context) {
 		return
 	}
 	ctl.userService.Delete(json)
-	res := BuildResponse(true, "create user success", EmptyObj{})
-	c.JSON(http.StatusOK, res)
-	c.Abort()
+	SendResponseOk(c, "", EmptyObj{})
 }
