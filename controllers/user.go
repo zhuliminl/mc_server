@@ -46,7 +46,12 @@ func (ctl *userController) GenerateUsers(c *gin.Context) {
 
 // 获取所有用户
 func (ctl *userController) GetAll(c *gin.Context) {
-	users := ctl.userService.GetAll()
+	users, err := ctl.userService.GetAll()
+	if err != nil {
+		res := helper.BuildErrorResponse("Failed to process request", err.Error(), helper.EmptyObj{})
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
 	res := helper.BuildResponse(true, "all users data", users)
 	c.JSON(http.StatusOK, res)
 	c.Abort()
@@ -61,7 +66,12 @@ func (ctl *userController) GetByUserId(c *gin.Context) {
 		return
 	}
 
-	user := ctl.userService.Get(id)
+	user, err := ctl.userService.Get(id)
+	if err != nil {
+		res := helper.BuildErrorResponse("Failed to process request", err.Error(), helper.EmptyObj{})
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
 	res := helper.BuildResponse(true, "user data", user)
 	c.JSON(http.StatusOK, res)
 	c.Abort()
@@ -76,7 +86,12 @@ func (ctl *userController) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
-	user := ctl.userService.Create(json)
+	user, err := ctl.userService.Create(json)
+	if err != nil {
+		res := helper.BuildErrorResponse("Failed to process request", err.Error(), helper.EmptyObj{})
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
 	res := helper.BuildResponse(true, "create user success", user)
 	c.JSON(http.StatusOK, res)
 }

@@ -9,12 +9,11 @@ import (
 )
 
 type UserService interface {
-	Get(id string) entity.User
-	// GetAll() []interface{}
-	GetAll() []dto.UserAll
-	Create(userPayload dto.UserCreate) entity.User
-	Delete(userPayload dto.UserDelete)
-	GenerateUsers(amount int)
+	Get(id string) (entity.User, error)
+	GetAll() ([]dto.UserAll, error)
+	Create(userPayload dto.UserCreate) (entity.User, error)
+	Delete(userPayload dto.UserDelete) error
+	GenerateUsers(amount int) error
 
 	// Get(name string) (*dto.User, error)
 	// List(user dto.SessionUser, conditions condition.Conditions) ([]dto.User, error)
@@ -38,14 +37,15 @@ func NewUserService(userRepo repository.UserRepository) UserService {
 	}
 }
 
-func (service *userService) Get(id string) entity.User {
+func (service *userService) Get(id string) (entity.User, error) {
 	return service.userRepository.Get(id)
 }
-func (service *userService) GetAll() []dto.UserAll {
+
+func (service *userService) GetAll() ([]dto.UserAll, error) {
 	return service.userRepository.GetAll()
 }
 
-func (service *userService) Create(userPayload dto.UserCreate) entity.User {
+func (service *userService) Create(userPayload dto.UserCreate) (entity.User, error) {
 	id := uuid.NewV4()
 	user := entity.User{
 		UserId:         id.String(),
@@ -58,17 +58,18 @@ func (service *userService) Create(userPayload dto.UserCreate) entity.User {
 	return service.userRepository.Create(user)
 }
 
-func (service *userService) Foo(id string) entity.User {
+func (service *userService) Foo(id string) (entity.User, error) {
 	return service.userRepository.Get(id)
 }
 
-func (service *userService) Delete(userPayload dto.UserDelete) {
-	service.userRepository.Delete(userPayload.UserId)
+func (service *userService) Delete(userPayload dto.UserDelete) error {
+	return service.userRepository.Delete(userPayload.UserId)
 }
 
-func (service *userService) GenerateUsers(length int) {
+func (service *userService) GenerateUsers(length int) error {
 	for i := 1; i <= length; i++ {
 		user := helper.FakerAUser()
 		service.userRepository.Create(user)
 	}
+	return nil
 }
