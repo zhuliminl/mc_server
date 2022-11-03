@@ -65,7 +65,7 @@ func (db *userConnection) GetAll() ([]dto.UserAll, error) {
 
 	rows, err := db.connection.Query(database.FindUserAll)
 	if err != nil {
-		log.Panicln("db-find-all-user-err", err)
+		// log.Panicln("db-find-all-user-err", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -109,7 +109,6 @@ func (db *userConnection) Update(id string) (entity.User, error) {
 func (db *userConnection) Create(user entity.User) (entity.User, error) {
 	stmt, err := db.connection.Prepare(database.CreateUser)
 	if err != nil {
-		log.Fatal(err)
 		return user, err
 	}
 	defer stmt.Close()
@@ -121,7 +120,6 @@ func (db *userConnection) Create(user entity.User) (entity.User, error) {
 		user.Password,
 	)
 	if err1 != nil {
-		log.Fatal("create-user-err1", err1)
 		return user, err
 	}
 	return user, nil

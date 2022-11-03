@@ -1,6 +1,11 @@
-package helper
+package controllers
 
-import "strings"
+import (
+	"net/http"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+)
 
 // Response is used for static shape json return
 type Response struct {
@@ -34,4 +39,24 @@ func BuildErrorResponse(message string, err string, data interface{}) Response {
 		Data:    data,
 	}
 	return res
+}
+
+// 处理 400 错误
+func Error400(c *gin.Context, err error) bool {
+	if err != nil {
+		res := BuildErrorResponse("请求错误", err.Error(), EmptyObj{})
+		c.JSON(http.StatusBadRequest, res)
+		return true
+	}
+	return false
+}
+
+// 处理 500 错误
+func Error500(c *gin.Context, err error) bool {
+	if err != nil {
+		res := BuildErrorResponse("服务错误", err.Error(), EmptyObj{})
+		c.JSON(http.StatusInternalServerError, res)
+		return true
+	}
+	return false
 }

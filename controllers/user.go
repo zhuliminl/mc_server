@@ -1,12 +1,12 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/zhuliminl/mc_server/dto"
-	"github.com/zhuliminl/mc_server/helper"
 	"github.com/zhuliminl/mc_server/service"
 )
 
@@ -32,11 +32,10 @@ func NewUserController(userService service.UserService) UserController {
 func (ctl *userController) GenerateUsers(c *gin.Context) {
 	amount := c.Query("amount")
 	amountInt, err := strconv.Atoi(amount)
-	if err != nil {
-		res := helper.BuildErrorResponse("Failed to process request", http.ErrUseLastResponse.Error(), err)
-		c.JSON(http.StatusBadRequest, res)
+	if Error400(c, err) {
 		return
 	}
+
 	ctl.userService.GenerateUsers(amountInt)
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -47,12 +46,11 @@ func (ctl *userController) GenerateUsers(c *gin.Context) {
 // 获取所有用户
 func (ctl *userController) GetAll(c *gin.Context) {
 	users, err := ctl.userService.GetAll()
-	if err != nil {
-		res := helper.BuildErrorResponse("Failed to process request", err.Error(), helper.EmptyObj{})
-		c.JSON(http.StatusBadRequest, res)
+	if Error500(c, err) {
 		return
 	}
-	res := helper.BuildResponse(true, "all users data", users)
+
+	res := BuildResponse(true, "all users data", users)
 	c.JSON(http.StatusOK, res)
 	c.Abort()
 }
@@ -61,18 +59,17 @@ func (ctl *userController) GetAll(c *gin.Context) {
 func (ctl *userController) GetByUserId(c *gin.Context) {
 	id := c.Query("userId")
 	if id == "" {
-		res := helper.BuildErrorResponse("Failed to process request", http.ErrUseLastResponse.Error(), helper.EmptyObj{})
-		c.JSON(http.StatusBadRequest, res)
-		return
+		if Error400(c, errors.New("id 参数为空")) {
+			return
+		}
 	}
 
 	user, err := ctl.userService.Get(id)
-	if err != nil {
-		res := helper.BuildErrorResponse("Failed to process request", err.Error(), helper.EmptyObj{})
-		c.JSON(http.StatusBadRequest, res)
+	if Error500(c, err) {
 		return
 	}
-	res := helper.BuildResponse(true, "user data", user)
+
+	res := BuildResponse(true, "user data", user)
 	c.JSON(http.StatusOK, res)
 	c.Abort()
 }
@@ -82,30 +79,29 @@ func (ctl *userController) Create(c *gin.Context) {
 	var json dto.UserCreate
 	err := c.ShouldBindJSON(&json)
 	if err != nil {
-		res := helper.BuildErrorResponse("Failed to process request", err.Error(), helper.EmptyObj{})
+		res := BuildErrorResponse("Failed to process request", err.Error(), EmptyObj{})
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 	user, err := ctl.userService.Create(json)
-	if err != nil {
-		res := helper.BuildErrorResponse("Failed to process request", err.Error(), helper.EmptyObj{})
-		c.JSON(http.StatusBadRequest, res)
+	if Error500(c, err) {
 		return
 	}
-	res := helper.BuildResponse(true, "create user success", user)
+
+	res := BuildResponse(true, "create user success", user)
 	c.JSON(http.StatusOK, res)
+	c.Abort()
 }
 
 // 删除用户
 func (ctl *userController) DeleteByUserId(c *gin.Context) {
 	var json dto.UserDelete
 	err := c.ShouldBindJSON(&json)
-	if err != nil {
-		res := helper.BuildErrorResponse("Failed to process request", err.Error(), helper.EmptyObj{})
-		c.JSON(http.StatusBadRequest, res)
+	if Error500(c, err) {
 		return
 	}
 	ctl.userService.Delete(json)
-	res := helper.BuildResponse(true, "create user success", helper.EmptyObj{})
+	res := BuildResponse(true, "create user success", EmptyObj{})
 	c.JSON(http.StatusOK, res)
+	c.Abort()
 }
