@@ -10,7 +10,7 @@ import (
 
 type UserService interface {
 	Get(id string) (entity.User, error)
-	GetAll() ([]dto.UserAll, error)
+	GetAll() ([]dto.User, error)
 	Create(userPayload dto.UserCreate) (entity.User, error)
 	Delete(userPayload dto.UserDelete) error
 	GenerateUsers(amount int) error
@@ -41,8 +41,19 @@ func (service *userService) Get(id string) (entity.User, error) {
 	return service.userRepository.Get(id)
 }
 
-func (service *userService) GetAll() ([]dto.UserAll, error) {
-	return service.userRepository.GetAll()
+func (service *userService) GetAll() ([]dto.User, error) {
+	users := []dto.User{}
+	_users, err := service.userRepository.GetAll()
+	if err != nil {
+		return users, err
+	}
+	for _, item := range _users {
+		append(users, dto.User{
+			UserId: item.UserId,
+		})
+
+	}
+
 }
 
 func (service *userService) Create(userPayload dto.UserCreate) (entity.User, error) {

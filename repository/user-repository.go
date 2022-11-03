@@ -5,13 +5,12 @@ import (
 	"log"
 
 	"github.com/zhuliminl/mc_server/database"
-	"github.com/zhuliminl/mc_server/dto"
 	"github.com/zhuliminl/mc_server/entity"
 )
 
 type UserRepository interface {
 	Get(id string) (entity.User, error)
-	GetAll() ([]dto.UserAll, error)
+	GetAll() ([]entity.User, error)
 	Update(id string) (entity.User, error)
 	Create(user entity.User) (entity.User, error)
 	Delete(userId string) error
@@ -38,15 +37,32 @@ func NewUserRepository(db *sql.DB) UserRepository {
 }
 
 func (db *userConnection) Get(userId string) (entity.User, error) {
-	var user entity.User
-	err := db.connection.QueryRow(database.FindUserByUserId, userId).Scan(
-		&user.UserId,
-		&user.Username,
-		&user.Email,
-		&user.Phone,
-		&user.WechatNickname,
-		&user.WechatNumber,
+	var (
+		_userId        sql.NullString
+		username       sql.NullString
+		email          sql.NullString
+		phone          sql.NullString
+		wechatNickname sql.NullString
+		wechatNumber   sql.NullString
 	)
+
+	err := db.connection.QueryRow(database.FindUserByUserId, userId).Scan(
+		&_userId,
+		&username,
+		&email,
+		&phone,
+		&wechatNickname,
+		&wechatNumber,
+	)
+
+	user := entity.User{
+		UserId:         _userId.String,
+		Username:       username.String,
+		Email:          email.String,
+		Phone:          phone.String,
+		WechatNickname: wechatNickname.String,
+		WechatNumber:   wechatNumber.String,
+	}
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -60,8 +76,8 @@ func (db *userConnection) Get(userId string) (entity.User, error) {
 	}
 }
 
-func (db *userConnection) GetAll() ([]dto.UserAll, error) {
-	var allUsers []dto.UserAll
+func (db *userConnection) GetAll() ([]entity.User, error) {
+	var allUsers []entity.User
 
 	rows, err := db.connection.Query(database.FindUserAll)
 	if err != nil {
@@ -88,7 +104,7 @@ func (db *userConnection) GetAll() ([]dto.UserAll, error) {
 			log.Println("db-scan-all-user-err", err)
 			return nil, err
 		}
-		user := dto.UserAll{
+		user := entity.User{
 			UserId:         userId.String,
 			Username:       username.String,
 			Email:          email.String,

@@ -11,7 +11,7 @@ type UserDelete struct {
 	UserId string `json:"userId" binding:"required"`
 }
 
-type UserAll struct {
+type User struct {
 	UserId         string `json:"userId"`
 	Username       string `json:"user_name"`
 	Email          string `json:"email"`
