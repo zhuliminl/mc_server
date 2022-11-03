@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/zhuliminl/mc_server/forms"
+	"github.com/zhuliminl/mc_server/dto"
 	"github.com/zhuliminl/mc_server/helper"
 	"github.com/zhuliminl/mc_server/service"
 )
@@ -69,7 +69,7 @@ func (ctl *userController) GetByUserId(c *gin.Context) {
 
 // 创建用户
 func (ctl *userController) Create(c *gin.Context) {
-	var json forms.UserCreate
+	var json dto.UserCreate
 	err := c.ShouldBindJSON(&json)
 	if err != nil {
 		res := helper.BuildErrorResponse("Failed to process request", err.Error(), helper.EmptyObj{})
@@ -83,7 +83,7 @@ func (ctl *userController) Create(c *gin.Context) {
 
 // 删除用户
 func (ctl *userController) DeleteByUserId(c *gin.Context) {
-	var json forms.UserDelete
+	var json dto.UserDelete
 	err := c.ShouldBindJSON(&json)
 	if err != nil {
 		res := helper.BuildErrorResponse("Failed to process request", err.Error(), helper.EmptyObj{})

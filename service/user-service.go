@@ -4,7 +4,6 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/zhuliminl/mc_server/dto"
 	"github.com/zhuliminl/mc_server/entity"
-	"github.com/zhuliminl/mc_server/forms"
 	"github.com/zhuliminl/mc_server/helper"
 	"github.com/zhuliminl/mc_server/repository"
 )
@@ -13,8 +12,8 @@ type UserService interface {
 	Get(id string) entity.User
 	// GetAll() []interface{}
 	GetAll() []dto.UserAll
-	Create(userPayload forms.UserCreate) entity.User
-	Delete(userPayload forms.UserDelete)
+	Create(userPayload dto.UserCreate) entity.User
+	Delete(userPayload dto.UserDelete)
 	GenerateUsers(amount int)
 
 	// Get(name string) (*dto.User, error)
@@ -46,7 +45,7 @@ func (service *userService) GetAll() []dto.UserAll {
 	return service.userRepository.GetAll()
 }
 
-func (service *userService) Create(userPayload forms.UserCreate) entity.User {
+func (service *userService) Create(userPayload dto.UserCreate) entity.User {
 	id := uuid.NewV4()
 	user := entity.User{
 		UserId:         id.String(),
@@ -63,7 +62,7 @@ func (service *userService) Foo(id string) entity.User {
 	return service.userRepository.Get(id)
 }
 
-func (service *userService) Delete(userPayload forms.UserDelete) {
+func (service *userService) Delete(userPayload dto.UserDelete) {
 	service.userRepository.Delete(userPayload.UserId)
 }
 
