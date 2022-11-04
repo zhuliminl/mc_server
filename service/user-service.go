@@ -83,7 +83,7 @@ func (service *userService) Delete(userDelete dto.UserDelete) error {
 		return err
 	}
 	if !exist {
-		return &customerrors.UserNotFoundError{}
+		return &customerrors.UserNotFoundError{Msg: "用户不在没有注册"}
 	}
 	return service.userRepository.Delete(userDelete.UserId)
 }

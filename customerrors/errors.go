@@ -1,9 +1,9 @@
 package customerrors
 
 type UserNotFoundError struct {
-	msg string
+	Msg string
 }
 
 func (e *UserNotFoundError) Error() string {
-	return e.msg
+	return e.Msg
 }
