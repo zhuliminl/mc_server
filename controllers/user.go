@@ -96,7 +96,7 @@ func (ctl *userController) DeleteByUserId(c *gin.Context) {
 	err = ctl.userService.Delete(json)
 	var userNotFoundError *customerrors.UserNotFoundError
 	if errors.As(err, &userNotFoundError) {
-		SendResponseFail(c, 1001, userNotFoundError.Msg, EmptyObj{})
+		SendResponseFail(c, userNotFoundError.Code, userNotFoundError.Msg, EmptyObj{})
 		return
 	}
 	if Error500(c, err) {
