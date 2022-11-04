@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 
@@ -24,7 +23,7 @@ func InitDB() {
 
 	c := config.GetConfig()
 	needCreate := c.GetBool("database.enableCreate")
-	fmt.Println("需要初始化数据库", needCreate)
+	log.Println("InitDB 需要初始化数据库", needCreate)
 	if needCreate {
 		createDB()
 	}
@@ -73,7 +72,7 @@ func createDB() {
 }
 
 func execSQL(sqlStmt string) {
-	log.Print("db inited execSQL sqlStmt: ", sqlStmt)
+	log.Print("SQL =================================>>> sqlStmt", sqlStmt)
 	stmt, err := DB.Prepare(sqlStmt)
 	if err != nil {
 		log.Println("db-execSQL-prepare-error: ", err)

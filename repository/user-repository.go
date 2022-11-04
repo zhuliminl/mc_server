@@ -2,7 +2,6 @@ package repository
 
 import (
 	"database/sql"
-	"log"
 
 	"github.com/zhuliminl/mc_server/database"
 	"github.com/zhuliminl/mc_server/entity"
@@ -66,10 +65,8 @@ func (db *userConnection) Get(userId string) (entity.User, error) {
 
 	switch {
 	case err == sql.ErrNoRows:
-		log.Println("saul ------------->>>> no user with id", userId)
 		return user, err
 	case err != nil:
-		log.Println("query Error", err)
 		return user, err
 	default:
 		return user, nil
@@ -81,7 +78,6 @@ func (db *userConnection) GetAll() ([]entity.User, error) {
 
 	rows, err := db.connection.Query(database.FindUserAll)
 	if err != nil {
-		// log.Panicln("db-find-all-user-err", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -101,7 +97,6 @@ func (db *userConnection) GetAll() ([]entity.User, error) {
 			&phone,
 			&wechatNickname,
 		); err != nil {
-			log.Println("db-scan-all-user-err", err)
 			return nil, err
 		}
 		user := entity.User{
@@ -118,7 +113,6 @@ func (db *userConnection) GetAll() ([]entity.User, error) {
 
 func (db *userConnection) Update(id string) (entity.User, error) {
 	var user entity.User
-	user.Username = "saul"
 	return user, nil
 }
 
@@ -150,10 +144,8 @@ func (db *userConnection) Delete(userId string) error {
 	err := db.connection.QueryRow(database.FindUserByUserId, userId).Scan(&id, &_userId, &username)
 	switch {
 	case err == sql.ErrNoRows:
-		log.Println("no user with id", userId)
 		return err
 	case err != nil:
-		log.Println("query Error", err)
 		return err
 	default:
 		return err

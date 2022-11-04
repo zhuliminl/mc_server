@@ -29,8 +29,6 @@ type Config struct {
 var vp *viper.Viper
 
 func Init(env string) {
-	fmt.Println("config => init", env)
-
 	vp = viper.New()
 	vp.SetConfigName("config")
 	vp.SetConfigType("json")
@@ -41,7 +39,7 @@ func Init(env string) {
 	err := vp.ReadInConfig()
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("configInit", err)
 	}
 
 }

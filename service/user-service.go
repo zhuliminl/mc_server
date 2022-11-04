@@ -42,18 +42,23 @@ func (service *userService) Get(id string) (entity.User, error) {
 }
 
 func (service *userService) GetAll() ([]dto.User, error) {
-	users := []dto.User{}
+	var users []dto.User
 	_users, err := service.userRepository.GetAll()
 	if err != nil {
 		return users, err
 	}
 	for _, item := range _users {
-		append(users, dto.User{
-			UserId: item.UserId,
-		})
+		dtoItem := dto.User{
+			UserId:         item.UserId,
+			Username:       item.Username,
+			Email:          item.Email,
+			Phone:          item.Phone,
+			WechatNickname: item.WechatNickname,
+		}
+		users = append(users, dtoItem)
 
 	}
-
+	return users, nil
 }
 
 func (service *userService) Create(userPayload dto.UserCreate) (entity.User, error) {
