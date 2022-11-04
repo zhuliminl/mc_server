@@ -13,7 +13,7 @@ type UserDelete struct {
 
 type User struct {
 	UserId         string `json:"userId"`
-	Username       string `json:"user_name"`
+	Username       string `json:"username"`
 	Email          string `json:"email"`
 	Phone          string `json:"phone"`
 	WechatNickname string `json:"wechat_nickname"`

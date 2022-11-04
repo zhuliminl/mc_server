@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/zhuliminl/mc_server/customerrors"
 	"github.com/zhuliminl/mc_server/dto"
 	"github.com/zhuliminl/mc_server/service"
 )
@@ -35,8 +36,11 @@ func (ctl *userController) GenerateUsers(c *gin.Context) {
 		return
 	}
 
-	ctl.userService.GenerateUsers(amountInt)
-	SendResponseOk(c, "", EmptyObj{})
+	users, err := ctl.userService.GenerateUsers(amountInt)
+	if Error500(c, err) {
+		return
+	}
+	SendResponseOk(c, "创建成功", users)
 }
 
 // 获取所有用户
@@ -86,9 +90,17 @@ func (ctl *userController) Create(c *gin.Context) {
 func (ctl *userController) DeleteByUserId(c *gin.Context) {
 	var json dto.UserDelete
 	err := c.ShouldBindJSON(&json)
+	if Error400(c, err) {
+		return
+	}
+	err = ctl.userService.Delete(json)
+	var userNotFoundError *customerrors.UserNotFoundError
+	if errors.As(err, &userNotFoundError) {
+		SendResponseFail(c, 1001, "用户不存在", EmptyObj{})
+		return
+	}
 	if Error500(c, err) {
 		return
 	}
-	ctl.userService.Delete(json)
-	SendResponseOk(c, "", EmptyObj{})
+	SendResponseOk(c, "删除成功", EmptyObj{})
 }

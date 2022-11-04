@@ -13,6 +13,7 @@ type UserRepository interface {
 	Update(id string) (entity.User, error)
 	Create(user entity.User) (entity.User, error)
 	Delete(userId string) error
+	Exist(userId string) (bool, error)
 
 	// GetAll() []interface{}
 	// List() ([]model.NtpServer, error)
@@ -65,7 +66,8 @@ func (db *userConnection) Get(userId string) (entity.User, error) {
 
 	switch {
 	case err == sql.ErrNoRows:
-		return user, err
+		// 空用户
+		return user, nil
 	case err != nil:
 		return user, err
 	default:
@@ -122,32 +124,34 @@ func (db *userConnection) Create(user entity.User) (entity.User, error) {
 		return user, err
 	}
 	defer stmt.Close()
-	_, err1 := stmt.Exec(
+
+	_, err = stmt.Exec(
 		user.UserId,
 		user.Username,
 		user.Email,
 		user.Phone,
 		user.Password,
 	)
-	if err1 != nil {
-		return user, err
-	}
-	return user, nil
+	return user, err
 }
 
 func (db *userConnection) Delete(userId string) error {
-	var (
-		id       int
-		_userId  string
-		username string
-	)
-	err := db.connection.QueryRow(database.FindUserByUserId, userId).Scan(&id, &_userId, &username)
-	switch {
-	case err == sql.ErrNoRows:
-		return err
-	case err != nil:
-		return err
-	default:
+	stmt, err := db.connection.Prepare(database.DeleteUserByUserId)
+	if err != nil {
 		return err
 	}
+	defer stmt.Close()
+	_, err = stmt.Exec(userId)
+	return err
+}
+
+func (db *userConnection) Exist(userId string) (bool, error) {
+	user, err := db.Get(userId)
+	if err != nil {
+		return false, err
+	}
+	if user.UserId == "" {
+		return false, nil
+	}
+	return true, err
 }

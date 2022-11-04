@@ -1,7 +1,10 @@
 package service
 
 import (
+	"log"
+
 	uuid "github.com/satori/go.uuid"
+	"github.com/zhuliminl/mc_server/customerrors"
 	"github.com/zhuliminl/mc_server/dto"
 	"github.com/zhuliminl/mc_server/entity"
 	"github.com/zhuliminl/mc_server/helper"
@@ -13,7 +16,7 @@ type UserService interface {
 	GetAll() ([]dto.User, error)
 	Create(userPayload dto.UserCreate) (entity.User, error)
 	Delete(userPayload dto.UserDelete) error
-	GenerateUsers(amount int) error
+	GenerateUsers(amount int) ([]dto.User, error)
 
 	// Get(name string) (*dto.User, error)
 	// List(user dto.SessionUser, conditions condition.Conditions) ([]dto.User, error)
@@ -74,18 +77,32 @@ func (service *userService) Create(userPayload dto.UserCreate) (entity.User, err
 	return service.userRepository.Create(user)
 }
 
-func (service *userService) Foo(id string) (entity.User, error) {
-	return service.userRepository.Get(id)
-}
-
-func (service *userService) Delete(userPayload dto.UserDelete) error {
-	return service.userRepository.Delete(userPayload.UserId)
-}
-
-func (service *userService) GenerateUsers(length int) error {
-	for i := 1; i <= length; i++ {
-		user := helper.FakerAUser()
-		service.userRepository.Create(user)
+func (service *userService) Delete(userDelete dto.UserDelete) error {
+	exist, err := service.userRepository.Exist(userDelete.UserId)
+	if err != nil {
+		return err
 	}
-	return nil
+	if !exist {
+		return &customerrors.UserNotFoundError{}
+	}
+	return service.userRepository.Delete(userDelete.UserId)
+}
+
+func (service *userService) GenerateUsers(length int) ([]dto.User, error) {
+	var users []dto.User
+	for i := 1; i <= length; i++ {
+		fakeUser := helper.FakerAUser()
+		user, err := service.userRepository.Create(fakeUser)
+		if err != nil {
+			log.Println("GenerateUsersError", err)
+		}
+		users = append(users, dto.User{
+			UserId:         user.UserId,
+			Username:       user.Username,
+			Email:          user.Email,
+			Phone:          user.Phone,
+			WechatNickname: user.WechatNickname,
+		})
+	}
+	return users, nil
 }
