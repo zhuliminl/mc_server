@@ -4,7 +4,7 @@ import (
 	"log"
 
 	uuid "github.com/satori/go.uuid"
-	"github.com/zhuliminl/mc_server/customerrors"
+	"github.com/zhuliminl/mc_server/constError"
 	"github.com/zhuliminl/mc_server/dto"
 	"github.com/zhuliminl/mc_server/entity"
 	"github.com/zhuliminl/mc_server/helper"
@@ -83,7 +83,7 @@ func (service *userService) Delete(userDelete dto.UserDelete) error {
 		return err
 	}
 	if !exist {
-		return &customerrors.UserNotFoundError{Msg: customerrors.MsgUserNotFound, Code: customerrors.CodeUserNotFound}
+		return constError.NewUserNotFound(err, "msg:上下文校对")
 	}
 	return service.userRepository.Delete(userDelete.UserId)
 }
