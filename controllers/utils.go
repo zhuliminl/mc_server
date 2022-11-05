@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/zhuliminl/mc_server/constError"
 	"net/http"
 	"strings"
 
@@ -64,16 +65,19 @@ func Error500(c *gin.Context, err error) bool {
 	return false
 }
 
+// 处理业务 错误
+func IsConstError(c *gin.Context, err error, bizErr constError.ConstError) bool {
+	if constError.Is(err, bizErr) {
+		res := BuildErrorResponse(bizErr.Message, bizErr.Code, err.Error(), EmptyObj{})
+		c.JSON(http.StatusOK, res)
+		return true
+	}
+	return false
+}
+
 // 发送成功的业务 response
 func SendResponseOk(c *gin.Context, message string, data interface{}) {
 	res := BuildResponse(true, 200, message, data)
-	c.JSON(http.StatusOK, res)
-	c.Abort()
-}
-
-// 发送失败的业务 response, code 自定义
-func SendResponseFail(c *gin.Context, code int, message string, data interface{}) {
-	res := BuildResponse(false, code, message, data)
 	c.JSON(http.StatusOK, res)
 	c.Abort()
 }

@@ -2,11 +2,11 @@ package controllers
 
 import (
 	"errors"
+	"github.com/zhuliminl/mc_server/constError"
 	"log"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/zhuliminl/mc_server/constError"
 	"github.com/zhuliminl/mc_server/dto"
 	"github.com/zhuliminl/mc_server/service"
 )
@@ -96,18 +96,10 @@ func (ctl *userController) DeleteByUserId(c *gin.Context) {
 	}
 	err = ctl.userService.Delete(json)
 	log.Println("saul >>>>>>>>>>>>>>>", err)
-	if constError.Is(err, constError.Timeout) {
-		SendResponseFail(c, constError.UserNotFound.Code, constError.UserNotFound.Error(), EmptyObj{})
+	if IsConstError(c, err, constError.UserNotFound) {
 		return
 	}
 
-	/*
-		var userNotFoundError *constError.UserNotFoundError
-		if errors.As(err, &userNotFoundError) {
-			SendResponseFail(c, userNotFoundError.Code, userNotFoundError.Msg, EmptyObj{})
-			return
-		}
-	*/
 	if Error500(c, err) {
 		return
 	}
