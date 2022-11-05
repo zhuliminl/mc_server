@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/zhuliminl/mc_server/constError"
+	"github.com/zhuliminl/mc_server/constant"
 	"net/http"
 	"strings"
 
@@ -48,7 +49,7 @@ func BuildErrorResponse(message string, code int, err string, data interface{}) 
 // 处理 400 错误
 func Error400(c *gin.Context, err error) bool {
 	if err != nil {
-		res := BuildErrorResponse("请求错误", 400, err.Error(), EmptyObj{})
+		res := BuildErrorResponse(constant.RequestError, 400, err.Error(), EmptyObj{})
 		c.JSON(http.StatusBadRequest, res)
 		return true
 	}
@@ -58,7 +59,7 @@ func Error400(c *gin.Context, err error) bool {
 // 处理 500 错误
 func Error500(c *gin.Context, err error) bool {
 	if err != nil {
-		res := BuildErrorResponse("服务错误", 500, err.Error(), EmptyObj{})
+		res := BuildErrorResponse(constant.ServerError, 500, err.Error(), EmptyObj{})
 		c.JSON(http.StatusInternalServerError, res)
 		return true
 	}

@@ -3,7 +3,7 @@ package controllers
 import (
 	"errors"
 	"github.com/zhuliminl/mc_server/constError"
-	"log"
+	"github.com/zhuliminl/mc_server/constant"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -41,7 +41,7 @@ func (ctl *userController) GenerateUsers(c *gin.Context) {
 	if Error500(c, err) {
 		return
 	}
-	SendResponseOk(c, "创建成功", users)
+	SendResponseOk(c, constant.CreateSuccess, users)
 }
 
 // 获取所有用户
@@ -58,7 +58,7 @@ func (ctl *userController) GetAll(c *gin.Context) {
 func (ctl *userController) GetByUserId(c *gin.Context) {
 	id := c.Query("userId")
 	if id == "" {
-		if Error400(c, errors.New("id 参数为空")) {
+		if Error400(c, errors.New(constant.ParamsEmpty)) {
 			return
 		}
 	}
@@ -84,7 +84,7 @@ func (ctl *userController) Create(c *gin.Context) {
 		return
 	}
 
-	SendResponseOk(c, "create user success", user)
+	SendResponseOk(c, constant.CreateSuccess, user)
 }
 
 // 删除用户
@@ -95,7 +95,6 @@ func (ctl *userController) DeleteByUserId(c *gin.Context) {
 		return
 	}
 	err = ctl.userService.Delete(json)
-	log.Println("saul >>>>>>>>>>>>>>>", err)
 	if IsConstError(c, err, constError.UserNotFound) {
 		return
 	}
@@ -103,5 +102,5 @@ func (ctl *userController) DeleteByUserId(c *gin.Context) {
 	if Error500(c, err) {
 		return
 	}
-	SendResponseOk(c, "删除成功", EmptyObj{})
+	SendResponseOk(c, constant.DeleteSuccess, EmptyObj{})
 }
