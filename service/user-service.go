@@ -1,8 +1,9 @@
 package service
 
 import (
-	"github.com/zhuliminl/mc_server/constError"
 	"log"
+
+	"github.com/zhuliminl/mc_server/constError"
 
 	uuid "github.com/satori/go.uuid"
 	"github.com/zhuliminl/mc_server/dto"
@@ -12,15 +13,15 @@ import (
 )
 
 type UserService interface {
-	Get(id string) (entity.User, error)
+	Get(id string) (dto.User, error)
 	GetAll() ([]dto.User, error)
-	Create(userPayload dto.UserCreate) (entity.User, error)
-	Delete(userPayload dto.UserDelete) error
+	Create(userCreate dto.UserCreate) (dto.User, error)
+	Delete(userDelete dto.UserDelete) error
 	GenerateUsers(amount int) ([]dto.User, error)
 
 	// Get(name string) (*dto.User, error)
 	// List(user dto.SessionUser, conditions condition.Conditions) ([]dto.User, error)
-	// Create(isSuper bool, creation dto.UserCreate) (*dto.User, error)
+	// kCreate(isSuper bool, creation dto.UserCreate) (*dto.User, error)
 	// Page(num, size int, user dto.SessionUser, conditions condition.Conditions) (*page.Page, error)
 	// Delete(name string) error
 	// Update(name string, isSuper bool, update dto.UserUpdate) (*dto.User, error)
@@ -40,8 +41,12 @@ func NewUserService(userRepo repository.UserRepository) UserService {
 	}
 }
 
-func (service *userService) Get(id string) (entity.User, error) {
-	return service.userRepository.Get(id)
+func (service *userService) Get(id string) (dto.User, error) {
+	user, err := service.userRepository.Get(id)
+	if err != nil {
+		return dto.User{}, err
+	}
+	return MapEntityUserToUser(user), nil
 }
 
 func (service *userService) GetAll() ([]dto.User, error) {
@@ -64,17 +69,21 @@ func (service *userService) GetAll() ([]dto.User, error) {
 	return users, nil
 }
 
-func (service *userService) Create(userPayload dto.UserCreate) (entity.User, error) {
-	id := uuid.NewV4()
+func (service *userService) Create(userPayload dto.UserCreate) (dto.User, error) {
+	userId := uuid.NewV4()
 	user := entity.User{
-		UserId:         id.String(),
+		UserId:         userId.String(),
 		Username:       userPayload.Username,
 		Email:          userPayload.Email,
 		Phone:          userPayload.Phone,
-		WechatNickname: "",
-		WechatNumber:   "",
+		// WechatNickname: "",
+		// WechatNumber:   "",
 	}
-	return service.userRepository.Create(user)
+	newUser, err := service.userRepository.Create(user)
+	if err != nil {
+		return dto.User{}, err
+	}
+	return MapEntityUserToUser(newUser), err
 }
 
 func (service *userService) Delete(userDelete dto.UserDelete) error {
@@ -97,13 +106,17 @@ func (service *userService) GenerateUsers(length int) ([]dto.User, error) {
 		if err != nil {
 			log.Println("GenerateUsersError", err)
 		}
-		users = append(users, dto.User{
-			UserId:         user.UserId,
-			Username:       user.Username,
-			Email:          user.Email,
-			Phone:          user.Phone,
-			WechatNickname: user.WechatNickname,
-		})
+		users = append(users, MapEntityUserToUser(user))
 	}
 	return users, nil
+}
+
+func MapEntityUserToUser(user entity.User) dto.User {
+	return dto.User{
+		UserId:         user.UserId,
+		Username:       user.Username,
+		Email:          user.Email,
+		Phone:          user.Phone,
+		WechatNickname: user.WechatNickname,
+	}
 }
