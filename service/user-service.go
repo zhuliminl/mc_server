@@ -51,31 +51,24 @@ func (service *userService) Get(id string) (dto.User, error) {
 
 func (service *userService) GetAll() ([]dto.User, error) {
 	var users []dto.User
-	_users, err := service.userRepository.GetAll()
+	allUsers, err := service.userRepository.GetAll()
 	if err != nil {
 		return users, err
 	}
-	for _, item := range _users {
-		dtoItem := dto.User{
-			UserId:         item.UserId,
-			Username:       item.Username,
-			Email:          item.Email,
-			Phone:          item.Phone,
-			WechatNickname: item.WechatNickname,
-		}
+	for _, item := range allUsers {
+		dtoItem := MapEntityUserToUser(item)
 		users = append(users, dtoItem)
-
 	}
 	return users, nil
 }
 
-func (service *userService) Create(userPayload dto.UserCreate) (dto.User, error) {
+func (service *userService) Create(userCreate dto.UserCreate) (dto.User, error) {
 	userId := uuid.NewV4()
 	user := entity.User{
 		UserId:         userId.String(),
-		Username:       userPayload.Username,
-		Email:          userPayload.Email,
-		Phone:          userPayload.Phone,
+		Username:       userCreate.Username,
+		Email:          userCreate.Email,
+		Phone:          userCreate.Phone,
 		// WechatNickname: "",
 		// WechatNumber:   "",
 	}
