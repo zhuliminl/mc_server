@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"github.com/zhuliminl/mc_server/constError"
 
 	"github.com/zhuliminl/mc_server/database"
 	"github.com/zhuliminl/mc_server/entity"
@@ -66,8 +67,9 @@ func (db *userConnection) Get(userId string) (entity.User, error) {
 
 	switch {
 	case err == sql.ErrNoRows:
+		return user, constError.NewUserNotFound(err, "没有查询到用户")
 		// 空用户
-		return user, nil
+		//return user, nil
 	case err != nil:
 		return user, err
 	default:

@@ -51,35 +51,37 @@ func (ctl *userController) GetAll(c *gin.Context) {
 		return
 	}
 
-	SendResponseOk(c, "", users)
+	SendResponseOk(c, constant.RequestSuccess, users)
 }
 
 // 获取用户
 func (ctl *userController) GetByUserId(c *gin.Context) {
-	id := c.Query("userId")
-	if id == "" {
+	userId := c.Query("userId")
+	if userId == "" {
 		if Error400(c, errors.New(constant.ParamsEmpty)) {
 			return
 		}
 	}
 
-	user, err := ctl.userService.Get(id)
+	user, err := ctl.userService.Get(userId)
+	if IsConstError(c, err, constError.UserNotFound) {
+		return
+	}
 	if Error500(c, err) {
 		return
 	}
-
-	SendResponseOk(c, "", user)
+	SendResponseOk(c, constant.RequestSuccess, user)
 }
 
 // 创建用户
 func (ctl *userController) Create(c *gin.Context) {
-	var json dto.UserCreate
-	err := c.ShouldBindJSON(&json)
+	var userCreate dto.UserCreate
+	err := c.ShouldBindJSON(&userCreate)
 	if Error400(c, err) {
 		return
 	}
 
-	user, err := ctl.userService.Create(json)
+	user, err := ctl.userService.Create(userCreate)
 	if Error500(c, err) {
 		return
 	}
@@ -98,7 +100,6 @@ func (ctl *userController) DeleteByUserId(c *gin.Context) {
 	if IsConstError(c, err, constError.UserNotFound) {
 		return
 	}
-
 	if Error500(c, err) {
 		return
 	}

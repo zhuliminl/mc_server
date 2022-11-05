@@ -1,10 +1,10 @@
 package service
 
 import (
+	"github.com/zhuliminl/mc_server/constError"
 	"log"
 
 	uuid "github.com/satori/go.uuid"
-	"github.com/zhuliminl/mc_server/constError"
 	"github.com/zhuliminl/mc_server/dto"
 	"github.com/zhuliminl/mc_server/entity"
 	"github.com/zhuliminl/mc_server/helper"
@@ -85,6 +85,7 @@ func (service *userService) Delete(userDelete dto.UserDelete) error {
 	if !exist {
 		return constError.NewUserNotFound(err, "msg:上下文校对")
 	}
+
 	return service.userRepository.Delete(userDelete.UserId)
 }
 
