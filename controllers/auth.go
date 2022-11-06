@@ -3,12 +3,14 @@ package controllers
 import (
 	"errors"
 	"fmt"
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/zhuliminl/mc_server/constError"
 	"github.com/zhuliminl/mc_server/constant"
 	"github.com/zhuliminl/mc_server/dto"
 	"github.com/zhuliminl/mc_server/service"
-	"log"
 )
 
 type AuthController interface {
@@ -74,9 +76,13 @@ func (ctl authController) Login(c *gin.Context) {
 		return
 	}
 	res, err := ctl.authService.VerifyCredential(userLogin.Email, userLogin.Password)
-	log.Println(" VerifyCredential ", err)
-	if !res.IsValid {
-		SendResponseOk(c, constant.RequestSuccess, EmptyObj{})
+	if IsConstError(c, err, constError.UserNotFound) {
+		return
+	}
+	if IsConstError(c, err, constError.PasswordNotMatch) {
+		return
+	}
+	if Error500(c, err) {
 		return
 	}
 
