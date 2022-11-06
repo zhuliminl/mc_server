@@ -13,8 +13,8 @@ func JWT(jwtService service.JWTService) gin.HandlerFunc {
 		tokenHeader := c.GetHeader("token")
 
 		if tokenHeader == "" {
-			response := controllers.BuildErrorResponse("token 参数不存在", 400, "请携带的 token 信息", controllers.EmptyObj{})
-			c.AbortWithStatusJSON(http.StatusBadRequest, response)
+			response := controllers.BuildErrorResponse("token 参数不存在", 401, "请携带的 token 信息", controllers.EmptyObj{})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}
 		token, err := jwtService.ValidateToken(tokenHeader)
