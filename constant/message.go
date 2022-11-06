@@ -11,4 +11,6 @@ const (
 	CreateFail     = "创建失败"
 	UpdateSuccess  = "更新成功"
 	DeleteSuccess  = "删除成功"
+	LoginSuccess   = "登录成功"
+	LoginFail      = "登录失败"
 )
