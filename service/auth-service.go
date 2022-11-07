@@ -12,7 +12,9 @@ import (
 type AuthService interface {
 	VerifyCredential(email string, password string) (dto.UserVerify, error)
 	VerifyRegisterByEmail(user dto.UserRegisterByEmail) error
-	CreateUser(user dto.UserRegisterByEmail) (dto.User, error)
+	VerifyRegisterByPhone(user dto.UserRegisterByPhone) error
+	CreateUserByEmail(user dto.UserRegisterByEmail) (dto.User, error)
+	CreateUserByPhone(user dto.UserRegisterByPhone) (dto.User, error)
 	//FindByEmail(email string) (dto.User, error)
 	//isDuplicateEmail(email string) (bool, error)
 }
@@ -59,8 +61,27 @@ func (service *authService) VerifyRegisterByEmail(user dto.UserRegisterByEmail) 
 	}
 	return nil
 }
+func (service *authService) VerifyRegisterByPhone(user dto.UserRegisterByPhone) error {
+	if !helper.IsPhoneValid(user.Phone) {
+		return constError.NewPhoneNumberNotValid(nil, "手机格式错误")
+	}
+	if !helper.IsPasswordValid(user.Password) {
+		return constError.NewPasswordNotValid(nil, "密码格式错误")
+	}
+	userFind, err := service.userRepository.GetByPhone(user.Phone)
+	if constError.Is(err, constError.UserNotFound) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if userFind.UserId != "" {
+		return constError.NewUserDuplicated(nil, "用户已注册")
+	}
+	return nil
+}
 
-func (service *authService) CreateUser(userRegister dto.UserRegisterByEmail) (dto.User, error) {
+func (service *authService) CreateUserByEmail(userRegister dto.UserRegisterByEmail) (dto.User, error) {
 	username := userRegister.Username
 	if username == "" {
 		username = helper.GenerateDefaultUserName()
@@ -70,6 +91,23 @@ func (service *authService) CreateUser(userRegister dto.UserRegisterByEmail) (dt
 		Email:    userRegister.Email,
 		Password: userRegister.Password,
 		Phone:    "",
+	})
+	if err != nil {
+		return dto.User{}, err
+	}
+	return user, nil
+}
+
+func (service *authService) CreateUserByPhone(userRegister dto.UserRegisterByPhone) (dto.User, error) {
+	username := userRegister.Username
+	if username == "" {
+		username = helper.GenerateDefaultUserName()
+	}
+	user, err := service.userService.Create(dto.UserCreate{
+		Username: username,
+		Email:    "",
+		Password: userRegister.Password,
+		Phone:    userRegister.Phone,
 	})
 	if err != nil {
 		return dto.User{}, err

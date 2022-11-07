@@ -76,7 +76,7 @@ func (ctl authController) RegisterByEmail(c *gin.Context) {
 		return
 	}
 	// 生成新用户
-	user, err := ctl.authService.CreateUser(userRegister)
+	user, err := ctl.authService.CreateUserByEmail(userRegister)
 	if Error500(c, err) {
 		return
 	}
@@ -86,7 +86,33 @@ func (ctl authController) RegisterByEmail(c *gin.Context) {
 }
 
 func (ctl authController) RegisterByPhone(c *gin.Context) {
-	SendResponseOk(c, constant.RequestSuccess, EmptyObj{})
+	var userRegister dto.UserRegisterByPhone
+	err := c.ShouldBindJSON(&userRegister)
+	if Error400(c, err) {
+		return
+	}
+	// 校验用户注册
+	err = ctl.authService.VerifyRegisterByPhone(userRegister)
+	if IsConstError(c, err, constError.EmailNotValid) {
+		return
+	}
+	if IsConstError(c, err, constError.PasswordNotValid) {
+		return
+	}
+	if IsConstError(c, err, constError.UserDuplicated) {
+		return
+	}
+	if Error500(c, err) {
+		return
+	}
+	// 生成新用户
+	user, err := ctl.authService.CreateUserByPhone(userRegister)
+	if Error500(c, err) {
+		return
+	}
+	token := ctl.jwtService.GenerateToken(user.UserId)
+	res := ResRegister{Token: token, User: user}
+	SendResponseOk(c, constant.RequestSuccess, res)
 }
 
 func NewAuthController(authService service.AuthService, userService service.UserService, jwtService service.JWTService) AuthController {
