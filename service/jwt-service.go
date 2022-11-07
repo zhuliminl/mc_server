@@ -40,6 +40,7 @@ func (j jwtService) GenerateToken(userId string) string {
 		jwt.RegisteredClaims{
 			// A usual scenario is to set the expiration time relative to the current time
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			//ExpiresAt: jwt.NewNumericDate(time.Now().Add(1000 * time.Second)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			Issuer:    j.issuer,

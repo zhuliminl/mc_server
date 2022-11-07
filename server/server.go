@@ -21,7 +21,7 @@ func StartServer() {
 		db             *sql.DB                    = database.GetDB()
 		userRepository repository.UserRepository  = repository.NewUserRepository(db)
 		userService    service.UserService        = service.NewUserService(userRepository)
-		authService    service.AuthService        = service.NewAuthService(userRepository)
+		authService    service.AuthService        = service.NewAuthService(userRepository, userService)
 		jwtService     service.JWTService         = service.NewJWTService()
 		userController controllers.UserController = controllers.NewUserController(userService)
 		authController controllers.AuthController = controllers.NewAuthController(authService, userService, jwtService)
@@ -38,11 +38,13 @@ func StartServer() {
 
 	router.POST("/generateUser", userController.GenerateUsers)
 	router.GET("/user", JWTMiddleware, userController.GetByUserId)
+	router.GET("/myInfo", JWTMiddleware, userController.GetMyInfo)
 	router.GET("/userAll", JWTMiddleware, userController.GetAll)
 	router.POST("/user", userController.Create)
 	router.DELETE("/user", userController.DeleteByUserId)
 	router.POST("/login", authController.Login)
-	router.POST("/register", authController.Register)
+	router.POST("/registerByEmail", authController.RegisterByEmail)
+	router.POST("/registerByPhone", authController.RegisterByPhone)
 
 	router.Run(address + ":" + port)
 }

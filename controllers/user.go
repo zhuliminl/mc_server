@@ -13,6 +13,7 @@ import (
 
 type UserController interface {
 	GetByUserId(context *gin.Context)
+	GetMyInfo(context *gin.Context)
 	GetAll(context *gin.Context)
 	Create(context *gin.Context)
 	DeleteByUserId(context *gin.Context)
@@ -57,6 +58,25 @@ func (ctl *userController) GetAll(c *gin.Context) {
 // 获取用户
 func (ctl *userController) GetByUserId(c *gin.Context) {
 	userId := c.Query("userId")
+	if userId == "" {
+		if Error400(c, errors.New(constant.ParamsEmpty)) {
+			return
+		}
+	}
+
+	user, err := ctl.userService.Get(userId)
+	if IsConstError(c, err, constError.UserNotFound) {
+		return
+	}
+	if Error500(c, err) {
+		return
+	}
+	SendResponseOk(c, constant.RequestSuccess, user)
+}
+
+// 获取自己的信息
+func (ctl *userController) GetMyInfo(c *gin.Context) {
+	userId := c.MustGet("CurrentUserId").(string)
 	if userId == "" {
 		if Error400(c, errors.New(constant.ParamsEmpty)) {
 			return

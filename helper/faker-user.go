@@ -3,6 +3,7 @@ package helper
 import (
 	fakerV4 "github.com/bxcodec/faker/v4"
 	"github.com/zhuliminl/mc_server/entity"
+	"math/rand"
 )
 
 func FakerAUser() entity.User {
@@ -15,4 +16,11 @@ func FakerAUser() entity.User {
 	user.WechatNickname = fakerV4.Name()
 	user.WechatNumber = fakerV4.CCNumber()
 	return user
+}
+
+func GenerateDefaultUserName() string {
+	amount := 10
+	index := rand.Intn(amount)
+	names := []string{"saul", "jemo", "tang", "qingle", "lee", "xiaoshitou", "brance", "jack", "zhuliminl", "janlin"}
+	return names[index]
 }
