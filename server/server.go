@@ -26,6 +26,8 @@ func StartServer() {
 		userController controllers.UserController = controllers.NewUserController(userService)
 		authController controllers.AuthController = controllers.NewAuthController(authService, userService, jwtService)
 	)
+
+	JWTMiddleware := middlewares.JWT(jwtService)
 	c := config.GetConfig()
 	address := c.GetString("server.address")
 	port := c.GetString("server.port")
@@ -35,14 +37,12 @@ func StartServer() {
 	router.Use(gin.Recovery())
 
 	router.POST("/generateUser", userController.GenerateUsers)
-	router.GET("/user", middlewares.JWT(jwtService), userController.GetByUserId)
-	router.GET("/userAll", middlewares.JWT(jwtService), userController.GetAll)
+	router.GET("/user", JWTMiddleware, userController.GetByUserId)
+	router.GET("/userAll", JWTMiddleware, userController.GetAll)
 	router.POST("/user", userController.Create)
 	router.DELETE("/user", userController.DeleteByUserId)
 	router.POST("/login", authController.Login)
 	router.POST("/register", authController.Register)
-	router.POST("/getToken", authController.GetToken)
-	router.GET("/validateToken", authController.VerifyToken)
 
 	router.Run(address + ":" + port)
 }

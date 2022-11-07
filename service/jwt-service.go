@@ -63,17 +63,4 @@ func (j jwtService) ValidateToken(tokenString string) (*jwt.Token, error) {
 		return []byte(j.secretKey), nil
 	})
 	return token, err
-
-	/*
-		if token.Valid {
-			fmt.Println("You look nice today")
-		} else if errors.Is(err, jwt.ErrTokenMalformed) {
-			fmt.Println("That's not even a token")
-		} else if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenNotValidYet) {
-			// Token is either expired or not active yet
-			fmt.Println("Timing is everything")
-		} else {
-			fmt.Println("Couldn't handle this token:", err)
-		}
-	*/
 }
