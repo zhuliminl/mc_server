@@ -61,8 +61,12 @@ func (service *authService) VerifyRegisterByEmail(user dto.UserRegisterByEmail) 
 }
 
 func (service *authService) CreateUser(userRegister dto.UserRegisterByEmail) (dto.User, error) {
+	username := userRegister.Username
+	if username == "" {
+		username = helper.GenerateDefaultUserName()
+	}
 	user, err := service.userService.Create(dto.UserCreate{
-		Username: userRegister.Username,
+		Username: username,
 		Email:    userRegister.Email,
 		Password: userRegister.Password,
 		Phone:    "",
