@@ -65,10 +65,11 @@ func (service *userService) GetAll() ([]dto.User, error) {
 func (service *userService) Create(userCreate dto.UserCreate) (dto.User, error) {
 	userId := uuid.NewV4()
 	user := entity.User{
-		UserId:         userId.String(),
-		Username:       userCreate.Username,
-		Email:          userCreate.Email,
-		Phone:          userCreate.Phone,
+		UserId:   userId.String(),
+		Username: userCreate.Username,
+		Email:    userCreate.Email,
+		Phone:    userCreate.Phone,
+		Password: userCreate.Password,
 		// WechatNickname: "",
 		// WechatNumber:   "",
 	}
