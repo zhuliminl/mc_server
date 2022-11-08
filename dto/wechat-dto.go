@@ -4,6 +4,17 @@ type WechatCode struct {
 	Code string `json:"code" binding:"required"`
 }
 
+type WechatAppLink struct {
+	Link string `json:"link"`
+	Uid string `json:"uid"`
+	ExpiredTime string `json:"expired_time"`
+}
+
+type LinkScanOver struct {
+	Uid string `json:"uid" binding:"required"`
+}
+
+
 type ResJsCode2session struct {
 	SessionKey string `json:"session_key"`
 	OpenId     string `json:"open_id"`

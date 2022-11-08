@@ -3,6 +3,7 @@ package server
 import (
 	"database/sql"
 
+	"github.com/go-redis/redis/v9"
 	"github.com/zhuliminl/mc_server/middlewares"
 
 	"github.com/gin-gonic/gin"
@@ -17,14 +18,35 @@ import (
 func init() {
 }
 
+// var ctx = context.Background()
+
 func StartServer() {
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+
+	/*
+	err := rdb.Set(ctx, "name", "saul", 0).Err()
+	if err != nil {
+		panic(err)
+	}
+
+	val, err := rdb.Get(ctx, "name").Result()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("key", val)
+	*/
+
 	var (
 		db               *sql.DB                      = database.GetDB()
 		userRepository   repository.UserRepository    = repository.NewUserRepository(db)
 		userService      service.UserService          = service.NewUserService(userRepository)
 		authService      service.AuthService          = service.NewAuthService(userRepository, userService)
 		jwtService       service.JWTService           = service.NewJWTService()
-		wechatService    service.WechatService        = service.NewWechatService(userRepository, userService)
+		wechatService    service.WechatService        = service.NewWechatService(userRepository, userService, rdb)
 		userController   controllers.UserController   = controllers.NewUserController(userService)
 		authController   controllers.AuthController   = controllers.NewAuthController(authService, userService, jwtService)
 		wechatController controllers.WechatController = controllers.NewWechatController(wechatService)
@@ -50,6 +72,8 @@ func StartServer() {
 	router.POST("/registerByEmail", authController.RegisterByEmail)
 	router.POST("/registerByPhone", authController.RegisterByPhone)
 	router.POST("/openId", wechatController.GetOpenID)
+	router.GET("/getMiniProgramLink", wechatController.GenerateAppLink)
+	router.POST("/miniProgramScanOver", wechatController.ScanOver)
 
 	router.Run(address + ":" + port)
 }

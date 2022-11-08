@@ -9,11 +9,38 @@ import (
 
 type WechatController interface {
 	GetOpenID(context *gin.Context)
+	GenerateAppLink(context *gin.Context)
+	ScanOver(context *gin.Context)
 }
 
 type wechatController struct {
 	wechatService service.WechatService
 }
+
+func (ctl wechatController) GenerateAppLink(c *gin.Context) {
+	linkDto, err := ctl.wechatService.GenerateAppLink()
+	if Error500(c, err) {
+		return
+	}
+
+	SendResponseOk(c, constant.RequestSuccess, linkDto)
+}
+
+func (ctl wechatController) ScanOver(c *gin.Context) {
+	var scan dto.LinkScanOver
+	err := c.ShouldBindJSON(&scan)
+	if Error400(c, err) {
+		return
+	}
+
+	err = ctl.wechatService.ScanOver(scan.Uid)
+	if Error500(c, err) {
+		return
+	}
+
+	SendResponseOk(c, constant.RequestSuccess, EmptyObj{})
+}
+
 
 func (ctl wechatController) GetOpenID(c *gin.Context) {
 	var wechatCode dto.WechatCode
