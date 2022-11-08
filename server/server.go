@@ -43,7 +43,8 @@ func StartServer() {
 	router.GET("/userAll", JWTMiddleware, userController.GetAll)
 	router.POST("/user", userController.Create)
 	router.DELETE("/user", userController.DeleteByUserId)
-	router.POST("/login", authController.Login)
+	router.POST("/loginByEmail", authController.LoginByEmail)
+	router.POST("/loginByPhone", authController.LoginByPhone)
 	router.POST("/registerByEmail", authController.RegisterByEmail)
 	router.POST("/registerByPhone", authController.RegisterByPhone)
 

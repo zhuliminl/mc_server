@@ -1,8 +1,9 @@
 package service
 
 import (
-	"github.com/zhuliminl/mc_server/helper"
 	"log"
+
+	"github.com/zhuliminl/mc_server/helper"
 
 	"github.com/zhuliminl/mc_server/constError"
 	"github.com/zhuliminl/mc_server/dto"
@@ -10,9 +11,12 @@ import (
 )
 
 type AuthService interface {
-	VerifyCredential(email string, password string) (dto.UserVerify, error)
+	VerifyCredentialByEmail(email string, password string) (dto.UserVerify, error)
+	VerifyCredentialByPhone(phone string, password string) (dto.UserVerify, error)
+
 	VerifyRegisterByEmail(user dto.UserRegisterByEmail) error
 	VerifyRegisterByPhone(user dto.UserRegisterByPhone) error
+
 	CreateUserByEmail(user dto.UserRegisterByEmail) (dto.User, error)
 	CreateUserByPhone(user dto.UserRegisterByPhone) (dto.User, error)
 	//FindByEmail(email string) (dto.User, error)
@@ -24,7 +28,7 @@ type authService struct {
 	userService    UserService
 }
 
-func (service *authService) VerifyCredential(email string, password string) (dto.UserVerify, error) {
+func (service *authService) VerifyCredentialByEmail(email string, password string) (dto.UserVerify, error) {
 	user, err := service.userRepository.GetByEmail(email)
 	if err != nil {
 		return dto.UserVerify{}, err
@@ -40,8 +44,26 @@ func (service *authService) VerifyCredential(email string, password string) (dto
 		IsValid: true,
 		User:    MapEntityUserToUser(user),
 	}, nil
-
 }
+
+func (service *authService) VerifyCredentialByPhone(phone string, password string) (dto.UserVerify, error) {
+	user, err := service.userRepository.GetByPhone(phone)
+	if err != nil {
+		return dto.UserVerify{}, err
+	}
+
+	log.Println("saul >>>>", user, password)
+	matchPwd := user.Password == password
+	if !matchPwd {
+		return dto.UserVerify{}, constError.NewPasswordNotMatch(nil, "密码匹配错误")
+	}
+
+	return dto.UserVerify{
+		IsValid: true,
+		User:    MapEntityUserToUser(user),
+	}, nil
+}
+
 func (service *authService) VerifyRegisterByEmail(user dto.UserRegisterByEmail) error {
 	if !helper.IsEmailValid(user.Email) {
 		return constError.NewEmailNotValid(nil, "邮箱格式错误")

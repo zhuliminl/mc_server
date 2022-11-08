@@ -23,6 +23,18 @@ type UserLogin struct {
 	Password string `json:"password" binding:"required"`
 }
 
+type UserLoginByEmail struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+
+type UserLoginByPhone struct {
+	Phone    string `json:"phone" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+
 type UserVerify struct {
 	IsValid bool
 	User

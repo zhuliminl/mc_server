@@ -9,7 +9,8 @@ import (
 )
 
 type AuthController interface {
-	Login(context *gin.Context)
+	LoginByEmail(context *gin.Context)
+	LoginByPhone(context *gin.Context)
 	RegisterByEmail(context *gin.Context)
 	RegisterByPhone(context *gin.Context)
 }
@@ -28,13 +29,34 @@ type ResRegister struct {
 	User  dto.User
 }
 
-func (ctl authController) Login(c *gin.Context) {
+func (ctl authController) LoginByEmail(c *gin.Context) {
 	var userLogin dto.UserLogin
 	err := c.ShouldBindJSON(&userLogin)
 	if Error400(c, err) {
 		return
 	}
-	res, err := ctl.authService.VerifyCredential(userLogin.Email, userLogin.Password)
+	res, err := ctl.authService.VerifyCredentialByEmail(userLogin.Email, userLogin.Password)
+	if IsConstError(c, err, constError.UserNotFound) {
+		return
+	}
+	if IsConstError(c, err, constError.PasswordNotMatch) {
+		return
+	}
+	if Error500(c, err) {
+		return
+	}
+
+	token := ctl.jwtService.GenerateToken(res.User.UserId)
+	SendResponseOk(c, constant.LoginSuccess, ResToken{Token: token})
+}
+
+func (ctl authController) LoginByPhone(c *gin.Context) {
+	var userLogin dto.UserLoginByPhone
+	err := c.ShouldBindJSON(&userLogin)
+	if Error400(c, err) {
+		return
+	}
+	res, err := ctl.authService.VerifyCredentialByPhone(userLogin.Phone, userLogin.Password)
 	if IsConstError(c, err, constError.UserNotFound) {
 		return
 	}
