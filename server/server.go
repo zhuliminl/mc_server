@@ -2,6 +2,7 @@ package server
 
 import (
 	"database/sql"
+
 	"github.com/zhuliminl/mc_server/middlewares"
 
 	"github.com/gin-gonic/gin"
