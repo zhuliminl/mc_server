@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/zhuliminl/mc_server/constError"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-redis/redis/v9"
 	uuid "github.com/satori/go.uuid"
@@ -27,6 +29,7 @@ type WechatService interface {
 	GetOpenId(wechatCode dto.WechatCode) (dto.ResJsCode2session, error)
 	GenerateAppLink() (dto.WechatAppLink, error)
 	ScanOver(uid string) error
+	GetMiniLinkStatus(uid string) (dto.MiniLinkUidStatus, error)
 }
 
 type wechatService struct {
@@ -35,25 +38,44 @@ type wechatService struct {
 	rdb            redis.Client
 }
 
+func (service wechatService) GetMiniLinkStatus(uid string) (dto.MiniLinkUidStatus, error) {
+	var miniLinkStatus dto.MiniLinkUidStatus
+	value, err := service.rdb.Get(ctx, uid).Result()
+	if err == redis.Nil {
+		return miniLinkStatus, constError.NewWechatLoginUidNotFound(err, "uid key 不存在")
+	} else if err != nil {
+		return miniLinkStatus, err
+	}
+	miniLinkStatus.Status = value
+	return miniLinkStatus, nil
+}
+
 func (service wechatService) GenerateAppLink() (dto.WechatAppLink, error) {
 	uid := uuid.NewV4().String()
 	var linkDto dto.WechatAppLink
 	linkDto.Link = appBaseLink + uid
 	linkDto.Uid = uid
 	// 存入 redis
-	// err :=service.rdb.Set(ctx, "wx_link_uid", uid, 0).Err()
-	err := service.rdb.Set(ctx, uid, constant.WechatLoginScanReady, 0).Err()
+	err := service.rdb.Set(ctx, uid, constant.WechatLoginScanReady, 1*time.Minute).Err()
 	if err != nil {
-		panic(err)
+		// better panic
+		return linkDto, err
 	}
 
 	return linkDto, nil
 }
 
 func (service wechatService) ScanOver(uid string) error {
-	err := service.rdb.Set(ctx, uid, constant.WechatLoginScanOver, 0).Err()
+	_, err := service.rdb.Get(ctx, uid).Result()
+	if err == redis.Nil {
+		return constError.NewWechatLoginUidNotFound(err, "uid key 不存在")
+	} else if err != nil {
+		return err
+	}
+
+	err = service.rdb.Set(ctx, uid, constant.WechatLoginScanOver, 1*time.Minute).Err()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	return nil

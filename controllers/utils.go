@@ -18,7 +18,7 @@ type Response struct {
 	Data    interface{} `json:"data"`
 }
 
-// EmptyObj object is used when data doesnt want to be null on json
+// EmptyObj object is used when data does not want to be null on json
 type EmptyObj struct{}
 
 // BuildResponse method is to inject data value to dynamic success response
@@ -46,7 +46,7 @@ func BuildErrorResponse(message string, code int, err string, data interface{}) 
 	return res
 }
 
-// 处理 400 错误
+// Error400 处理 400 错误
 func Error400(c *gin.Context, err error) bool {
 	if err != nil {
 		res := BuildErrorResponse(constant.RequestError, 400, err.Error(), EmptyObj{})
@@ -56,7 +56,7 @@ func Error400(c *gin.Context, err error) bool {
 	return false
 }
 
-// 处理 500 错误
+// Error500 处理 500 错误
 func Error500(c *gin.Context, err error) bool {
 	if err != nil {
 		res := BuildErrorResponse(constant.ServerError, 500, err.Error(), EmptyObj{})
@@ -66,7 +66,7 @@ func Error500(c *gin.Context, err error) bool {
 	return false
 }
 
-// 处理业务 错误
+// IsConstError 处理业务 错误
 func IsConstError(c *gin.Context, err error, bizErr constError.ConstError) bool {
 	if constError.Is(err, bizErr) {
 		res := BuildErrorResponse(bizErr.Message, bizErr.Code, err.Error(), EmptyObj{})
@@ -76,7 +76,7 @@ func IsConstError(c *gin.Context, err error, bizErr constError.ConstError) bool 
 	return false
 }
 
-// 发送成功的业务 response
+// SendResponseOk 发送成功的业务 response
 func SendResponseOk(c *gin.Context, message string, data interface{}) {
 	res := BuildResponse(true, 200, message, data)
 	c.JSON(http.StatusOK, res)

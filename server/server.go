@@ -28,16 +28,16 @@ func StartServer() {
 	})
 
 	/*
-	err := rdb.Set(ctx, "name", "saul", 0).Err()
-	if err != nil {
-		panic(err)
-	}
+		err := rdb.Set(ctx, "name", "saul", 0).Err()
+		if err != nil {
+			panic(err)
+		}
 
-	val, err := rdb.Get(ctx, "name").Result()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("key", val)
+		val, err := rdb.Get(ctx, "name").Result()
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("key", val)
 	*/
 
 	var (
@@ -73,6 +73,7 @@ func StartServer() {
 	router.POST("/registerByPhone", authController.RegisterByPhone)
 	router.POST("/openId", wechatController.GetOpenID)
 	router.GET("/getMiniProgramLink", wechatController.GenerateAppLink)
+	router.GET("/getMiniLinkStatus", wechatController.GetMiniLinkStatus)
 	router.POST("/miniProgramScanOver", wechatController.ScanOver)
 
 	router.Run(address + ":" + port)

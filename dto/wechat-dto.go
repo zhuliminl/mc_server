@@ -5,8 +5,8 @@ type WechatCode struct {
 }
 
 type WechatAppLink struct {
-	Link string `json:"link"`
-	Uid string `json:"uid"`
+	Link        string `json:"link"`
+	Uid         string `json:"uid"`
 	ExpiredTime string `json:"expired_time"`
 }
 
@@ -14,6 +14,13 @@ type LinkScanOver struct {
 	Uid string `json:"uid" binding:"required"`
 }
 
+type MiniLinkUid struct {
+	Uid string `json:"uid" binding:"required"`
+}
+
+type MiniLinkUidStatus struct {
+	Status string `json:"status"`
+}
 
 type ResJsCode2session struct {
 	SessionKey string `json:"session_key"`
