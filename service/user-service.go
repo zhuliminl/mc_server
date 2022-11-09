@@ -18,17 +18,6 @@ type UserService interface {
 	Create(userCreate dto.UserCreate) (dto.User, error)
 	Delete(userDelete dto.UserDelete) error
 	GenerateUsers(amount int) ([]dto.User, error)
-
-	// Get(name string) (*dto.User, error)
-	// List(user dto.SessionUser, conditions condition.Conditions) ([]dto.User, error)
-	// kCreate(isSuper bool, creation dto.UserCreate) (*dto.User, error)
-	// Page(num, size int, user dto.SessionUser, conditions condition.Conditions) (*page.Page, error)
-	// Delete(name string) error
-	// Update(name string, isSuper bool, update dto.UserUpdate) (*dto.User, error)
-	// Batch(op dto.UserOp) error
-	// ChangePassword(isSuper bool, ch dto.UserChangePassword) error
-	// UserAuth(name string, password string) (user *model.User, err error)
-	// ResetPassword(fp dto.UserForgotPassword) error
 }
 
 type userService struct {

@@ -55,7 +55,6 @@ func (service wechatService) GenerateAppLink() (dto.WechatAppLink, error) {
 	var linkDto dto.WechatAppLink
 	linkDto.Link = appBaseLink + uid
 	linkDto.Uid = uid
-	// 存入 redis
 	err := service.rdb.Set(ctx, uid, constant.WechatLoginScanReady, 1*time.Minute).Err()
 	if err != nil {
 		// better panic
@@ -84,8 +83,7 @@ func (service wechatService) ScanOver(uid string) error {
 func (service wechatService) GetOpenId(wechatCode dto.WechatCode) (dto.ResJsCode2session, error) {
 	var session dto.ResJsCode2session
 	url := fmt.Sprintf(code2sessionURL, appID, appSecret, wechatCode.Code)
-	log.Println("URL of getOpenId >>>", url)
-	//return session, nil
+	log.Println("saul URL of getOpenId >>>", url)
 
 	resp, err := http.Get(url)
 	if err != nil {

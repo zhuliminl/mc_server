@@ -19,8 +19,6 @@ type AuthService interface {
 
 	CreateUserByEmail(user dto.UserRegisterByEmail) (dto.User, error)
 	CreateUserByPhone(user dto.UserRegisterByPhone) (dto.User, error)
-	//FindByEmail(email string) (dto.User, error)
-	//isDuplicateEmail(email string) (bool, error)
 }
 
 type authService struct {

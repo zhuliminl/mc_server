@@ -18,27 +18,12 @@ import (
 func init() {
 }
 
-// var ctx = context.Background()
-
 func StartServer() {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
-
-	/*
-		err := rdb.Set(ctx, "name", "saul", 0).Err()
-		if err != nil {
-			panic(err)
-		}
-
-		val, err := rdb.Get(ctx, "name").Result()
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println("key", val)
-	*/
 
 	var (
 		db               *sql.DB                      = database.GetDB()
@@ -71,6 +56,7 @@ func StartServer() {
 	router.POST("/loginByPhone", authController.LoginByPhone)
 	router.POST("/registerByEmail", authController.RegisterByEmail)
 	router.POST("/registerByPhone", authController.RegisterByPhone)
+
 	router.POST("/openId", wechatController.GetOpenID)
 	router.GET("/getMiniProgramLink", wechatController.GenerateAppLink)
 	router.GET("/getMiniLinkStatus", wechatController.GetMiniLinkStatus)
