@@ -18,8 +18,8 @@ import (
 
 const (
 	code2sessionURL = "https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code"
-	appID           = "wxfd67f0c2f607440b"
-	appSecret       = "a18ab85b749acb11c421cc96df3318da"
+	appID           = "wx333789da24c1f349"
+	appSecret       = "62c790cced311e81907eea2d0b3a6310"
 	appBaseLink     = "http://www.baidu.com"
 )
 
@@ -102,9 +102,16 @@ func (service wechatService) GetOpenId(wechatCode dto.WechatCode) (dto.ResJsCode
 
 	log.Println("saul ==============>>> wxMap", wxMap)
 
+	var errorCode int
+	if _, ok := wxMap["errcode"].(int); ok {
+		errorCode = wxMap["errcode"].(int)
+	} else {
+		errorCode = int(wxMap["errcode"].(float64))
+	}
+
 	session.OpenId = wxMap["openid"].(string)
 	session.SessionKey = wxMap["session_key"].(string)
-	session.Errcode = int(wxMap["errcode"].(float64))
+	session.Errcode = errorCode
 	session.Errmsg = wxMap["errmsg"].(string)
 
 	return session, nil
