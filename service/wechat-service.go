@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/zhuliminl/mc_server/constError"
@@ -13,6 +14,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/zhuliminl/mc_server/constant"
 	"github.com/zhuliminl/mc_server/dto"
+	"github.com/zhuliminl/mc_server/helper"
 	"github.com/zhuliminl/mc_server/repository"
 )
 
@@ -81,6 +83,24 @@ func (service wechatService) ScanOver(uid string) error {
 }
 
 func (service wechatService) GetOpenId(wechatCode dto.WechatCode) (dto.ResJsCode2session, error) {
+	// 测试解密
+	aesKey, err := base64.StdEncoding.DecodeString("q8vJomuvMB6QISZznoXSDw==")
+	aesIv, err := base64.StdEncoding.DecodeString("Iim2Edy+qLm3bTT9tsQ13A==")
+
+	base64Ciphertext :=
+		"mF6qBn0ixpZspD3VKzie0tfI1g7uVSgJAK2PLOg3i3QpM78+i+sP81J2qchYu6u9jwpmWtkKXQ7kkOdSAeOefKKKEI3Y8tkMtz0Qz/MGqtuwFIwsbAiTU2htWZWyOnTL45LuPuihw3t3mx874gXCcJi9ZiDscaKBcPxHuVMYqaTiYVKHvyBlsui6l/l5v7+/6eNyi2jHvD3QLClCf98UxQ=="
+	ciphertext, err := base64.StdEncoding.DecodeString(base64Ciphertext)
+	if err != nil {
+		log.Println("saul >>>>>>>>>>>>>>kjll", err)
+	}
+
+	raw, err := helper.AESDecryptData(ciphertext, aesKey, aesIv)
+	if err != nil {
+		log.Println("saul >>>>nnnnnnnnnn", err)
+	}
+	log.Println("saul AESDecryptData", string(raw))
+	//
+
 	var session dto.ResJsCode2session
 	url := fmt.Sprintf(code2sessionURL, appID, appSecret, wechatCode.Code)
 	log.Println("saul URL of getOpenId >>>", url)
