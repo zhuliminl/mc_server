@@ -185,7 +185,7 @@ func (service wechatService) LoginWithEncryptedPhoneData(wxLoginData dto.WxLogin
 	if err != nil {
 		return resWxLogin, err
 	}
-	log.Println("saul BBBBBBBBBBBBBBB", resOfNumber)
+
 	resWxLogin.Phone = resOfNumber.PurePhoneNumber
 	return resWxLogin, nil
 }
