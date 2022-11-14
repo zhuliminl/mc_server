@@ -218,7 +218,6 @@ func (service wechatService) CreateWxUser(openId string, phone string) error {
 	user, err := service.userRepository.GetByPhone(phone)
 	if constError.Is(err, constError.UserNotFound) {
 		// 新建用户
-		// 新建用户
 		userId := uuid.NewV4()
 		_, err := service.userRepository.CreateByWxLogin(entity.User{
 			UserId:   userId.String(),
@@ -230,10 +229,10 @@ func (service wechatService) CreateWxUser(openId string, phone string) error {
 		if err != nil {
 			return err
 		}
-	}
-
-	if err != nil {
-		return err
+	} else {
+		if err != nil {
+			return err
+		}
 	}
 
 	log.Println("现存用户", user)

@@ -10,7 +10,7 @@ const createUserTable = `
     password VARCHAR(100) COMMENT '密码',
     wechatNickname VARCHAR(32) COMMENT '微信昵称',
     wechatNumber VARCHAR(20) COMMENT '微信号',
-    openId VARCHAR(20) COMMENT '微信号 openid'
+    openId VARCHAR(128) COMMENT '微信号 openid'
   );
 `
 
