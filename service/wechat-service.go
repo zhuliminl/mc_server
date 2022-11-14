@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/zhuliminl/mc_server/constError"
+	"github.com/zhuliminl/mc_server/entity"
 	"github.com/zhuliminl/mc_server/helper"
 	"log"
 	"net/http"
@@ -147,6 +148,15 @@ func (service wechatService) GetOpenId(wechatCodeDto dto.WechatCodeDto) (dto.Res
 		}
 	}
 
+	if session.OpenId != "" {
+		// 绑定 openId
+		err := service.rdb.Set(ctx, wechatCodeDto.LoginSessionId+constant.PrefixWechatOpenId, session.OpenId, constant.MiniLoginExpiredMinute*time.Minute).Err()
+		if err != nil {
+			// better panic
+			return session, err
+		}
+	}
+
 	return session, nil
 }
 
@@ -162,6 +172,13 @@ func (service wechatService) LoginWithEncryptedPhoneData(wxLoginData dto.WxLogin
 	sessionKey, err := service.rdb.Get(ctx, wxLoginData.LoginSessionId+constant.PrefixWechatSessionKey).Result()
 	if err == redis.Nil {
 		return resWxLogin, errors.New("wechat sessionKey 不存在，可能已过期")
+	} else if err != nil {
+		return resWxLogin, err
+	}
+
+	openId, err := service.rdb.Get(ctx, wxLoginData.LoginSessionId+constant.PrefixWechatOpenId).Result()
+	if err == redis.Nil {
+		return resWxLogin, errors.New("wechat openId 不存在，可能已过期")
 	} else if err != nil {
 		return resWxLogin, err
 	}
@@ -187,7 +204,40 @@ func (service wechatService) LoginWithEncryptedPhoneData(wxLoginData dto.WxLogin
 	}
 
 	resWxLogin.Phone = resOfNumber.PurePhoneNumber
+	// 将该用户写入数据库
+	err = service.CreateWxUser(openId, resWxLogin.Phone)
+	if err != nil {
+		return resWxLogin, err
+	}
+
 	return resWxLogin, nil
+}
+
+func (service wechatService) CreateWxUser(openId string, phone string) error {
+	// 检查是否登陆注册过，登陆过则更新用户
+	user, err := service.userRepository.GetByPhone(phone)
+	if constError.Is(err, constError.UserNotFound) {
+		// 新建用户
+		// 新建用户
+		userId := uuid.NewV4()
+		_, err := service.userRepository.CreateByWxLogin(entity.User{
+			UserId:   userId.String(),
+			Username: "微信用户",
+			Phone:    phone,
+			OpenId:   openId,
+		})
+
+		if err != nil {
+			return err
+		}
+	}
+
+	if err != nil {
+		return err
+	}
+
+	log.Println("现存用户", user)
+	return nil
 }
 
 func NewWechatService(userRepo repository.UserRepository, userService UserService, rdb *redis.Client) WechatService {

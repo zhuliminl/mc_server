@@ -10,4 +10,5 @@ const (
 	MiniLoginExpiredMinute = 60
 	PrefixLogin            = "__login_session_id"
 	PrefixWechatSessionKey = "__wechat_session_key"
+	PrefixWechatOpenId     = "__openId"
 )

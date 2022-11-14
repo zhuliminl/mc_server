@@ -18,6 +18,7 @@ type UserRepository interface {
 	Create(user entity.User) (entity.User, error)
 	Delete(userId string) error
 	Exist(userId string) (bool, error)
+	CreateByWxLogin(user entity.User) (entity.User, error)
 
 	// GetAll() []interface{}
 	// List() ([]model.NtpServer, error)
@@ -239,4 +240,20 @@ func (db *userConnection) Exist(userId string) (bool, error) {
 		return false, nil
 	}
 	return true, err
+}
+
+func (db *userConnection) CreateByWxLogin(user entity.User) (entity.User, error) {
+	stmt, err := db.connection.Prepare(database.CreateUserWithWxBaseData)
+	if err != nil {
+		return user, err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(
+		user.UserId,
+		user.Username,
+		user.Phone,
+		user.OpenId,
+	)
+	return user, err
 }

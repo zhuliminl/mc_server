@@ -8,5 +8,6 @@ type User struct {
 	Password       string `json:"pwd"`
 	WechatNickname string `json:"wechat_nickname"`
 	WechatNumber   string `json:"wechat_number"`
+	OpenId         string `json:"openId"`
 	Token          string `json:"token"`
 }

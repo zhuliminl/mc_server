@@ -9,11 +9,13 @@ const createUserTable = `
     phone VARCHAR(20) COMMENT '手机号码',
     password VARCHAR(100) COMMENT '密码',
     wechatNickname VARCHAR(32) COMMENT '微信昵称',
-    wechatNumber VARCHAR(20) COMMENT '微信号'
+    wechatNumber VARCHAR(20) COMMENT '微信号',
+    openId VARCHAR(20) COMMENT '微信号 openid'
   );
 `
 
 const CreateUser = `INSERT INTO user(userId, username, email, phone, password ) VALUES ( ?, ?, ?, ?, ? )`
+const CreateUserWithWxBaseData = `INSERT INTO user(userId, username, phone, openId ) VALUES ( ?, ?, ?, ? )`
 const DeleteUserByUserId = `DELETE FROM user WHERE userId=?`
 const FindUserByUserId = `SELECT userId, username, email, phone, wechatNickname, wechatNumber from user WHERE userId=?`
 const FindUserByEmail = `SELECT userId, username, email, phone, password, wechatNickname, wechatNumber from user WHERE email=?`
