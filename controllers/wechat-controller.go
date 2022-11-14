@@ -21,7 +21,7 @@ type WechatController interface {
 
 type wechatController struct {
 	wechatService service.WechatService
-	jwtService service.JWTService
+	jwtService    service.JWTService
 }
 
 // GenerateAppLink 生成小程序跳转链接
@@ -49,11 +49,16 @@ func (ctl wechatController) GetMiniLinkStatus(c *gin.Context) {
 	if Error500(c, err) {
 		return
 	}
-	if statusDto.Status == strconv.FormatInt(constant.WechatLoginSuccess, 10) {
-	token := ctl.jwtService.GenerateToken(user.UserId)
-	res := ResRegister{Token: token, User: user}
+	if statusDto.Status == strconv.FormatInt(0, 10) {
+		userDto, err := ctl.wechatService.GetUserByLoginSessionId(loginSessionId)
+		if Error500(c, err) {
+			return
+		}
 
-
+		token := ctl.jwtService.GenerateToken(userDto.UserId)
+		res := ResRegister{Token: token, User: userDto}
+		SendResponseOk(c, constant.RequestSuccess, res)
+		return
 	}
 	SendResponseOk(c, constant.RequestSuccess, statusDto)
 }
@@ -110,6 +115,6 @@ func (ctl wechatController) LoginWithEncryptedPhoneData(c *gin.Context) {
 func NewWechatController(wechatService service.WechatService, jwtService service.JWTService) WechatController {
 	return &wechatController{
 		wechatService: wechatService,
-		jwtService: jwtService,
+		jwtService:    jwtService,
 	}
 }
