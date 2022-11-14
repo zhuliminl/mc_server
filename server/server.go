@@ -61,6 +61,7 @@ func StartServer() {
 	router.GET("/getMiniProgramLink", wechatController.GenerateAppLink)
 	router.GET("/getMiniLinkStatus", wechatController.GetMiniLinkStatus)
 	router.POST("/miniProgramScanOver", wechatController.ScanOver)
+	router.POST("/loginWithEncryptedPhoneData", wechatController.LoginWithEncryptedPhoneData)
 
 	router.Run(address + ":" + port)
 }

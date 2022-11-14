@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/zhuliminl/mc_server/constError"
+	"github.com/zhuliminl/mc_server/helper"
 	"log"
 	"net/http"
 	"time"
@@ -14,7 +16,6 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/zhuliminl/mc_server/constant"
 	"github.com/zhuliminl/mc_server/dto"
-	"github.com/zhuliminl/mc_server/helper"
 	"github.com/zhuliminl/mc_server/repository"
 )
 
@@ -28,10 +29,11 @@ const (
 var ctx = context.Background()
 
 type WechatService interface {
-	GetOpenId(wechatCode dto.WechatCode) (dto.ResJsCode2session, error)
+	GetOpenId(wechatCode dto.WechatCodeDto) (dto.ResJsCode2session, error)
 	GenerateAppLink() (dto.WechatAppLink, error)
-	ScanOver(uid string) error
-	GetMiniLinkStatus(uid string) (dto.MiniLinkUidStatus, error)
+	ScanOver(loginSessionId string) error
+	GetMiniLinkStatus(loginSessionId string) (dto.MiniLinkStatus, error)
+	LoginWithEncryptedPhoneData(wxLoginData dto.WxLoginData) (dto.ResWxLogin, error)
 }
 
 type wechatService struct {
@@ -40,9 +42,9 @@ type wechatService struct {
 	rdb            redis.Client
 }
 
-func (service wechatService) GetMiniLinkStatus(uid string) (dto.MiniLinkUidStatus, error) {
-	var miniLinkStatus dto.MiniLinkUidStatus
-	value, err := service.rdb.Get(ctx, uid).Result()
+func (service wechatService) GetMiniLinkStatus(loginSessionId string) (dto.MiniLinkStatus, error) {
+	var miniLinkStatus dto.MiniLinkStatus
+	value, err := service.rdb.Get(ctx, loginSessionId+constant.PrefixLogin).Result()
 	if err == redis.Nil {
 		return miniLinkStatus, constError.NewWechatLoginUidNotFound(err, "uid key 不存在")
 	} else if err != nil {
@@ -53,11 +55,11 @@ func (service wechatService) GetMiniLinkStatus(uid string) (dto.MiniLinkUidStatu
 }
 
 func (service wechatService) GenerateAppLink() (dto.WechatAppLink, error) {
-	uid := uuid.NewV4().String()
+	loginSessionId := uuid.NewV4().String()
 	var linkDto dto.WechatAppLink
-	linkDto.Link = appBaseLink + uid
-	linkDto.Uid = uid
-	err := service.rdb.Set(ctx, uid, constant.WechatLoginScanReady, 1*time.Minute).Err()
+	linkDto.Link = appBaseLink + "?login_session_id=" + loginSessionId
+	linkDto.LoginSessionId = loginSessionId
+	err := service.rdb.Set(ctx, loginSessionId+constant.PrefixLogin, constant.WechatLoginScanReady, constant.MiniLoginExpiredMinute*time.Minute).Err()
 	if err != nil {
 		// better panic
 		return linkDto, err
@@ -66,15 +68,15 @@ func (service wechatService) GenerateAppLink() (dto.WechatAppLink, error) {
 	return linkDto, nil
 }
 
-func (service wechatService) ScanOver(uid string) error {
-	_, err := service.rdb.Get(ctx, uid).Result()
+func (service wechatService) ScanOver(loginSessionId string) error {
+	_, err := service.rdb.Get(ctx, loginSessionId+constant.PrefixLogin).Result()
 	if err == redis.Nil {
-		return constError.NewWechatLoginUidNotFound(err, "uid key 不存在")
+		return constError.NewWechatLoginUidNotFound(err, "loginSessionId key 不存在")
 	} else if err != nil {
 		return err
 	}
 
-	err = service.rdb.Set(ctx, uid, constant.WechatLoginScanOver, 1*time.Minute).Err()
+	err = service.rdb.Set(ctx, loginSessionId+constant.PrefixLogin, constant.WechatLoginScanOver, constant.MiniLoginExpiredMinute*time.Minute).Err()
 	if err != nil {
 		return err
 	}
@@ -82,28 +84,30 @@ func (service wechatService) ScanOver(uid string) error {
 	return nil
 }
 
-func (service wechatService) GetOpenId(wechatCode dto.WechatCode) (dto.ResJsCode2session, error) {
+func (service wechatService) GetOpenId(wechatCodeDto dto.WechatCodeDto) (dto.ResJsCode2session, error) {
 	// 测试解密
-	aesKey, err := base64.StdEncoding.DecodeString("q8vJomuvMB6QISZznoXSDw==")
-	aesIv, err := base64.StdEncoding.DecodeString("Iim2Edy+qLm3bTT9tsQ13A==")
+	/*
+		aesKey, err := base64.StdEncoding.DecodeString("q8vJomuvMB6QISZznoXSDw==")
+		aesIv, err := base64.StdEncoding.DecodeString("Iim2Edy+qLm3bTT9tsQ13A==")
 
-	base64Ciphertext :=
-		"mF6qBn0ixpZspD3VKzie0tfI1g7uVSgJAK2PLOg3i3QpM78+i+sP81J2qchYu6u9jwpmWtkKXQ7kkOdSAeOefKKKEI3Y8tkMtz0Qz/MGqtuwFIwsbAiTU2htWZWyOnTL45LuPuihw3t3mx874gXCcJi9ZiDscaKBcPxHuVMYqaTiYVKHvyBlsui6l/l5v7+/6eNyi2jHvD3QLClCf98UxQ=="
-	ciphertext, err := base64.StdEncoding.DecodeString(base64Ciphertext)
-	if err != nil {
-		log.Println("saul >>>>>>>>>>>>>>kjll", err)
-	}
+		base64Ciphertext :=
+			"mF6qBn0ixpZspD3VKzie0tfI1g7uVSgJAK2PLOg3i3QpM78+i+sP81J2qchYu6u9jwpmWtkKXQ7kkOdSAeOefKKKEI3Y8tkMtz0Qz/MGqtuwFIwsbAiTU2htWZWyOnTL45LuPuihw3t3mx874gXCcJi9ZiDscaKBcPxHuVMYqaTiYVKHvyBlsui6l/l5v7+/6eNyi2jHvD3QLClCf98UxQ=="
+		ciphertext, err := base64.StdEncoding.DecodeString(base64Ciphertext)
+		if err != nil {
+			log.Println("saul >>>>>>>>>>>>>>kjll", err)
+		}
 
-	raw, err := helper.AESDecryptData(ciphertext, aesKey, aesIv)
-	if err != nil {
-		log.Println("saul >>>>nnnnnnnnnn", err)
-	}
-	log.Println("saul AESDecryptData", string(raw))
-	//
+		raw, err := helper.AESDecryptData(ciphertext, aesKey, aesIv)
+		if err != nil {
+			log.Println("saul >>>>nnnnnnnnnn", err)
+		}
+		log.Println("saul AESDecryptData", string(raw))
+		//
+	*/
 
 	var session dto.ResJsCode2session
-	url := fmt.Sprintf(code2sessionURL, appID, appSecret, wechatCode.Code)
-	log.Println("saul URL of getOpenId >>>", url)
+	url := fmt.Sprintf(code2sessionURL, appID, appSecret, wechatCodeDto.Code)
+	log.Println("code2sessionURL", url)
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -120,7 +124,7 @@ func (service wechatService) GetOpenId(wechatCode dto.WechatCode) (dto.ResJsCode
 	}
 	defer resp.Body.Close()
 
-	log.Println("saul ==============>>> wxMap", wxMap)
+	log.Println("code2sessionWechatMap", wxMap)
 
 	var errorCode int
 	if _, ok := wxMap["errcode"].(int); ok {
@@ -134,7 +138,56 @@ func (service wechatService) GetOpenId(wechatCode dto.WechatCode) (dto.ResJsCode
 	session.Errcode = errorCode
 	session.Errmsg = wxMap["errmsg"].(string)
 
+	if session.SessionKey != "" {
+		// 绑定 sessionKey 到 loginSessionId
+		err := service.rdb.Set(ctx, wechatCodeDto.LoginSessionId+constant.PrefixWechatSessionKey, session.SessionKey, constant.MiniLoginExpiredMinute*time.Minute).Err()
+		if err != nil {
+			// better panic
+			return session, err
+		}
+	}
+
 	return session, nil
+}
+
+func (service wechatService) LoginWithEncryptedPhoneData(wxLoginData dto.WxLoginData) (dto.ResWxLogin, error) {
+	var resWxLogin dto.ResWxLogin
+	_, err := service.rdb.Get(ctx, wxLoginData.LoginSessionId+constant.PrefixLogin).Result()
+	if err == redis.Nil {
+		return resWxLogin, constError.NewWechatLoginUidNotFound(err, "loginSessionId key 不存在")
+	} else if err != nil {
+		return resWxLogin, err
+	}
+
+	sessionKey, err := service.rdb.Get(ctx, wxLoginData.LoginSessionId+constant.PrefixWechatSessionKey).Result()
+	if err == redis.Nil {
+		return resWxLogin, errors.New("wechat sessionKey 不存在，可能已过期")
+	} else if err != nil {
+		return resWxLogin, err
+	}
+
+	aesKey, err := base64.StdEncoding.DecodeString(sessionKey)
+	aesIv, err := base64.StdEncoding.DecodeString(wxLoginData.Iv)
+
+	base64Ciphertext := wxLoginData.EncryptedData
+	ciphertext, err := base64.StdEncoding.DecodeString(base64Ciphertext)
+	if err != nil {
+		log.Println("WechatDecodeStringError", err)
+	}
+	raw, err := helper.AESDecryptData(ciphertext, aesKey, aesIv)
+	if err != nil {
+		log.Println("WechatAESDecryptDataError", err)
+	}
+
+	var resOfNumber dto.WxGetPhoneNumberRes
+	log.Println("AESDecryptData", string(raw))
+	err = json.Unmarshal(raw, &resOfNumber)
+	if err != nil {
+		return resWxLogin, err
+	}
+	log.Println("saul BBBBBBBBBBBBBBB", resOfNumber)
+	resWxLogin.Phone = resOfNumber.PurePhoneNumber
+	return resWxLogin, nil
 }
 
 func NewWechatService(userRepo repository.UserRepository, userService UserService, rdb *redis.Client) WechatService {

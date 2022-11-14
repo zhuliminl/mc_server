@@ -14,29 +14,14 @@ type WechatController interface {
 	GenerateAppLink(context *gin.Context)
 	ScanOver(context *gin.Context)
 	GetMiniLinkStatus(context *gin.Context)
+	LoginWithEncryptedPhoneData(context *gin.Context)
 }
 
 type wechatController struct {
 	wechatService service.WechatService
 }
 
-func (ctl wechatController) GetMiniLinkStatus(c *gin.Context) {
-	uid := c.Query("uid")
-	if uid == "" {
-		if Error400(c, errors.New(constant.ParamsEmpty)) {
-			return
-		}
-	}
-	status, err := ctl.wechatService.GetMiniLinkStatus(uid)
-	if IsConstError(c, err, constError.WechatLoginUidNotFound) {
-		return
-	}
-	if Error500(c, err) {
-		return
-	}
-	SendResponseOk(c, constant.RequestSuccess, status)
-}
-
+// GenerateAppLink 生成小程序跳转链接
 func (ctl wechatController) GenerateAppLink(c *gin.Context) {
 	linkDto, err := ctl.wechatService.GenerateAppLink()
 	if Error500(c, err) {
@@ -46,6 +31,25 @@ func (ctl wechatController) GenerateAppLink(c *gin.Context) {
 	SendResponseOk(c, constant.RequestSuccess, linkDto)
 }
 
+// GetMiniLinkStatus web 端轮询当前登录链接状态
+func (ctl wechatController) GetMiniLinkStatus(c *gin.Context) {
+	loginSessionId := c.Query("login_session_id")
+	if loginSessionId == "" {
+		if Error400(c, errors.New(constant.ParamsEmpty)) {
+			return
+		}
+	}
+	status, err := ctl.wechatService.GetMiniLinkStatus(loginSessionId)
+	if IsConstError(c, err, constError.WechatLoginUidNotFound) {
+		return
+	}
+	if Error500(c, err) {
+		return
+	}
+	SendResponseOk(c, constant.RequestSuccess, status)
+}
+
+// ScanOver 通知服务用户扫描结束，刷新当前链接状态
 func (ctl wechatController) ScanOver(c *gin.Context) {
 	var scan dto.LinkScanOver
 	err := c.ShouldBindJSON(&scan)
@@ -53,7 +57,7 @@ func (ctl wechatController) ScanOver(c *gin.Context) {
 		return
 	}
 
-	err = ctl.wechatService.ScanOver(scan.Uid)
+	err = ctl.wechatService.ScanOver(scan.LoginSessionId)
 	if IsConstError(c, err, constError.WechatLoginUidNotFound) {
 		return
 	}
@@ -65,8 +69,9 @@ func (ctl wechatController) ScanOver(c *gin.Context) {
 	SendResponseOk(c, constant.RequestSuccess, EmptyObj{})
 }
 
+// GetOpenID 小程序用户点击登录，获取用户 openId，同时获取到微信的 sessionKey 绑定
 func (ctl wechatController) GetOpenID(c *gin.Context) {
-	var wechatCode dto.WechatCode
+	var wechatCode dto.WechatCodeDto
 	err := c.ShouldBindJSON(&wechatCode)
 	if Error400(c, err) {
 		return
@@ -77,6 +82,20 @@ func (ctl wechatController) GetOpenID(c *gin.Context) {
 		return
 	}
 	SendResponseOk(c, constant.RequestSuccess, session)
+}
+
+func (ctl wechatController) LoginWithEncryptedPhoneData(c *gin.Context) {
+	var wxLoginData dto.WxLoginData
+	err := c.ShouldBindJSON(&wxLoginData)
+	if Error400(c, err) {
+		return
+	}
+
+	resWxLogin, err := ctl.wechatService.LoginWithEncryptedPhoneData(wxLoginData)
+	if Error500(c, err) {
+		return
+	}
+	SendResponseOk(c, constant.RequestSuccess, resWxLogin)
 }
 
 func NewWechatController(wechatService service.WechatService) WechatController {

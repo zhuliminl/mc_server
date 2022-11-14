@@ -8,7 +8,7 @@ var (
 	PhoneNumberNotValid    = ConstError{Message: "手机号码格式不正确", Code: 1004}
 	EmailNotValid          = ConstError{Message: "密码格式不正确", Code: 1005}
 	UserDuplicated         = ConstError{Message: "用户已注册", Code: 1006}
-	WechatLoginUidNotFound = ConstError{Message: "没有查询到登录 uid,没有生成 uid 或者已过期", Code: 1007}
+	WechatLoginUidNotFound = ConstError{Message: "没有查询到登录 sessionId,没有生成 uid 或者已过期", Code: 1007}
 )
 
 func NewUserNotFound(err error, msg string) error {
