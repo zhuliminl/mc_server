@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/zhuliminl/mc_server/constError"
-	"github.com/zhuliminl/mc_server/entity"
-	"github.com/zhuliminl/mc_server/helper"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/zhuliminl/mc_server/constError"
+	"github.com/zhuliminl/mc_server/entity"
+	"github.com/zhuliminl/mc_server/helper"
 
 	"github.com/go-redis/redis/v9"
 	uuid "github.com/satori/go.uuid"
@@ -35,6 +36,7 @@ type WechatService interface {
 	ScanOver(loginSessionId string) error
 	GetMiniLinkStatus(loginSessionId string) (dto.MiniLinkStatus, error)
 	LoginWithEncryptedPhoneData(wxLoginData dto.WxLoginData) (dto.ResWxLogin, error)
+	GetUserByLoginSessionId(loginSessionId string) (dto.User, error)
 }
 
 type wechatService struct {
@@ -217,6 +219,24 @@ func (service wechatService) CreateWxUser(openId string, phone string) error {
 
 	log.Println("现存用户", user)
 	return nil
+}
+
+func (service wechatService) GetUserByLoginSessionId(loginSessionId string) (dto.User,error ){
+	var userDto dto.User
+	openId, err := service.rdb.Get(ctx, loginSessionId+constant.PrefixWechatOpenId).Result()
+	if err == redis.Nil {
+		return userDto, errors.New("wechat openId 不存在，可能已过期")
+	} else if err != nil {
+		return userDto, err
+	}
+
+	user, err := service.userRepository.GetByOpenId(openId)
+	if err != nil {
+		return userDto, err
+	}
+	
+	userDto = MapEntityUserToUser(user)
+	return userDto, nil
 }
 
 func NewWechatService(userRepo repository.UserRepository, userService UserService, rdb *redis.Client) WechatService {

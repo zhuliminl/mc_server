@@ -20,5 +20,6 @@ const DeleteUserByUserId = `DELETE FROM user WHERE userId=?`
 const FindUserByUserId = `SELECT userId, username, email, phone, wechatNickname, wechatNumber from user WHERE userId=?`
 const FindUserByEmail = `SELECT userId, username, email, phone, password, wechatNickname, wechatNumber from user WHERE email=?`
 const FindUserByPhone = `SELECT userId, username, email, phone, password, wechatNickname, wechatNumber from user WHERE phone=?`
+const FindUserByOpenId = `SELECT userId, username, email, phone, password, wechatNickname, wechatNumber from user WHERE openId=?`
 const FindUserAll = `SELECT userId, username, email, phone, wechatNickname from user`
 const UpdateUser = ``

@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"errors"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/zhuliminl/mc_server/constError"
 	"github.com/zhuliminl/mc_server/constant"
@@ -19,6 +21,7 @@ type WechatController interface {
 
 type wechatController struct {
 	wechatService service.WechatService
+	jwtService service.JWTService
 }
 
 // GenerateAppLink 生成小程序跳转链接
@@ -39,14 +42,20 @@ func (ctl wechatController) GetMiniLinkStatus(c *gin.Context) {
 			return
 		}
 	}
-	status, err := ctl.wechatService.GetMiniLinkStatus(loginSessionId)
+	statusDto, err := ctl.wechatService.GetMiniLinkStatus(loginSessionId)
 	if IsConstError(c, err, constError.WechatLoginUidNotFound) {
 		return
 	}
 	if Error500(c, err) {
 		return
 	}
-	SendResponseOk(c, constant.RequestSuccess, status)
+	if statusDto.Status == strconv.FormatInt(constant.WechatLoginSuccess, 10) {
+	token := ctl.jwtService.GenerateToken(user.UserId)
+	res := ResRegister{Token: token, User: user}
+
+
+	}
+	SendResponseOk(c, constant.RequestSuccess, statusDto)
 }
 
 // ScanOver 通知服务用户扫描结束，刷新当前链接状态
@@ -98,8 +107,9 @@ func (ctl wechatController) LoginWithEncryptedPhoneData(c *gin.Context) {
 	SendResponseOk(c, constant.RequestSuccess, resWxLogin)
 }
 
-func NewWechatController(wechatService service.WechatService) WechatController {
+func NewWechatController(wechatService service.WechatService, jwtService service.JWTService) WechatController {
 	return &wechatController{
 		wechatService: wechatService,
+		jwtService: jwtService,
 	}
 }

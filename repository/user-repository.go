@@ -13,6 +13,7 @@ type UserRepository interface {
 	Get(id string) (entity.User, error)
 	GetByEmail(email string) (entity.User, error)
 	GetByPhone(phone string) (entity.User, error)
+	GetByOpenId(openId string) (entity.User, error)
 	GetAll() ([]entity.User, error)
 	Update(id string) (entity.User, error)
 	Create(user entity.User) (entity.User, error)
@@ -132,6 +133,47 @@ func (db *userConnection) GetByPhone(phoneString string) (entity.User, error) {
 	)
 
 	err := db.connection.QueryRow(database.FindUserByPhone, phoneString).Scan(
+		&_userId,
+		&username,
+		&email,
+		&phone,
+		&password,
+		&wechatNickname,
+		&wechatNumber,
+	)
+
+	user := entity.User{
+		UserId:         _userId.String,
+		Username:       username.String,
+		Email:          email.String,
+		Phone:          phone.String,
+		Password:       password.String,
+		WechatNickname: wechatNickname.String,
+		WechatNumber:   wechatNumber.String,
+	}
+
+	switch {
+	case err == sql.ErrNoRows:
+		return user, constError.NewUserNotFound(err, "没有查询到用户")
+	case err != nil:
+		return user, err
+	default:
+		return user, nil
+	}
+}
+
+func (db *userConnection) GetByOpenId(openId string) (entity.User, error) {
+	var (
+		_userId        sql.NullString
+		username       sql.NullString
+		email          sql.NullString
+		phone          sql.NullString
+		password       sql.NullString
+		wechatNickname sql.NullString
+		wechatNumber   sql.NullString
+	)
+
+	err := db.connection.QueryRow(database.FindUserByOpenId, openId).Scan(
 		&_userId,
 		&username,
 		&email,

@@ -34,7 +34,7 @@ func StartServer() {
 		wechatService    service.WechatService        = service.NewWechatService(userRepository, userService, rdb)
 		userController   controllers.UserController   = controllers.NewUserController(userService)
 		authController   controllers.AuthController   = controllers.NewAuthController(authService, userService, jwtService)
-		wechatController controllers.WechatController = controllers.NewWechatController(wechatService)
+		wechatController controllers.WechatController = controllers.NewWechatController(wechatService, jwtService)
 	)
 
 	JWTMiddleware := middlewares.JWT(jwtService)
